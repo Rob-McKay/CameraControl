@@ -20,6 +20,11 @@
 
 #include "EDSDK.h"
 
+std::unique_ptr<camera_connection> get_camera_connection()
+{
+    return std::make_unique<implementation::impl_camera_connection>();
+}
+
 namespace implementation
 {
 impl_camera_connection::impl_camera_connection()

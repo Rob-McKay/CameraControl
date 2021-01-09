@@ -43,7 +43,7 @@ public:
 class camera_ref
 {
 public:
-    virtual std::shared_ptr<connection_info> get_connection_info() const = 0;
+    virtual std::shared_ptr<const connection_info> get_connection_info() const = 0;
     virtual std::shared_ptr<camera_info> get_camera_info() = 0;
 };
 
@@ -54,9 +54,10 @@ public:
 
     virtual int number_of_cameras() const = 0;
     virtual std::shared_ptr<camera_ref> select_camera(size_type camera_number) = 0;
+    virtual ~camera_connection() {};
 };
 
-
+std::unique_ptr<camera_connection> get_camera_connection();
 
 #pragma GCC visibility pop
 #endif

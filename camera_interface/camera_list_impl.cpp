@@ -34,7 +34,7 @@ impl_camera_list::impl_camera_list() : list(nullptr), count(0)
         throw std::runtime_error("Failed to get camera list");
     }
     
-    if (auto err = EdsGetChildCount(list, &listCount); err == EDS_ERR_OK)
+    if (auto err = EdsGetChildCount(list, &listCount); err != EDS_ERR_OK)
     {
         std::cerr << "Failed to get camera list count (" << err << ")\n";
         throw std::runtime_error("Failed to get camera list count");
@@ -76,10 +76,4 @@ impl_camera_list::size_type impl_camera_list::size() const noexcept
     return count;
 }
 
-
-
-
-
-
 }
-

@@ -13,7 +13,9 @@
 #endif
 #endif
 
-#include <stdio.h>
+#include <iostream>
+
+#if 0
 #include "EDSDK.h"
 #include <stdbool.h>
 
@@ -135,41 +137,27 @@ EdsError getCameraInfo(EdsCameraRef camera, char* name)
     }
     return err;
 }
+#endif
+
+#include "camera_interface.hpp"
 
 int main(int argc, const char * argv[])
 {
-    EdsError err = EDS_ERR_OK;
-    EdsCameraRef camera = NULL;
-    bool isSDKLoaded = false;
+    auto cameras = get_camera_connection();
     
-    // Initialize SDK
-    err = EdsInitializeSDK();
-    if(err == EDS_ERR_OK)
+    int count = cameras->number_of_cameras();
+    if (count < 1)
     {
-        isSDKLoaded = true;
+        std::cout << "No cameras found\n";
     }
-    
-    if(err == EDS_ERR_OK)
-    {
-        int count =  getCameraCount();
+    else
         for (int cameraNumber = 0; cameraNumber < count; cameraNumber++)
         {
-            EdsDeviceInfo info;
-            EdsCameraRef camera;
-            
-            EdsError e = getCamera(cameraNumber, &camera);
-            if (e == EDS_ERR_OK)
-            {
-                e = EdsGetDeviceInfo(camera, &info);
-                if (e == EDS_ERR_OK)
-                {
-                    printf("Camera at port %s, device %s\n", info.szPortName, info.szDeviceDescription);
-                }
-                EdsRelease(camera);
-            }
+            auto camera_ref = cameras->select_camera(cameraNumber);
+            auto conn_info = camera_ref->get_connection_info();
+            std::cout << "Found camera " << cameraNumber << " on port " << conn_info->get_port() << ": " << conn_info->get_desc() << std::endl;
         }
-    }
-    
+        
 //    // Get first camera
 //    if(err == EDS_ERR_OK)
 //    {
@@ -179,37 +167,37 @@ int main(int argc, const char * argv[])
 //
 //    if(err == EDS_ERR_OK)
 //    {
-//        
+//
 //    }
-//    
+//
 //    // Set Object event handler
 //    if(err == EDS_ERR_OK)
 //    {
 //        printf("Registering object event handler\n");
 //        err = EdsSetObjectEventHandler(camera, kEdsObjectEvent_All, handleObjectEvent, NULL);
 //    }
-//    
+//
 //    // Set Property event handler
 //    if(err == EDS_ERR_OK)
 //    {
 //        printf("Registering property event handler\n");
 //        err = EdsSetPropertyEventHandler(camera, kEdsPropertyEvent_All, handlePropertyEvent, NULL);
 //    }
-//    
+//
 //    // Set State event handler
 //    if(err == EDS_ERR_OK)
 //    {
 //        printf("Registering camera state event handler\n");
 //        err = EdsSetCameraStateEventHandler(camera, kEdsStateEvent_All, handleStateEvent, NULL);
 //    }
-//    
+//
 //    // Open session with camera
 //    if(err == EDS_ERR_OK)
 //    {
 //        printf("Opening session\n");
 //        err = EdsOpenSession(camera);
 //    }
-//    
+//
 //    //
 //    // do something
 //    //
@@ -226,14 +214,14 @@ int main(int argc, const char * argv[])
 //            printf("Error %d while getting camera name\n", e);
 //        }
 //    }
-//    
+//
 //    // Close session with camera
 //    if(err == EDS_ERR_OK)
 //    {
 //        printf("Closing session\n");
 //        err = EdsCloseSession(camera);
 //    }
-//    
+//
 //    // Release camera
 //    if(camera != NULL)
 //    {
@@ -241,11 +229,5 @@ int main(int argc, const char * argv[])
 //        EdsRelease(camera);
 //    }
     
-    // Terminate SDK
-    if(isSDKLoaded)
-    {
-        EdsTerminateSDK();
-    }
-
-    return err;
+    return 0;
 }

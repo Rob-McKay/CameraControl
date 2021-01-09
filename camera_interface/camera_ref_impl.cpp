@@ -22,22 +22,26 @@
 
 namespace implementation
 {
+impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
+{
+    EdsDeviceInfo device_info;
+    
+    if (auto err = EdsGetDeviceInfo(camera, &device_info); err != EDS_ERR_OK)
+    {
+        throw std::runtime_error("oops");
+    }
+    
+    conn_info = std::make_shared<impl_connection_info>(device_info.szPortName, device_info.szDeviceDescription);
+}
+
 impl_camera_ref::~impl_camera_ref()
 {
     //TODO:;
 }
 
-
-impl_camera_ref::impl_camera_ref(EdsCameraRef camera)
+std::shared_ptr<const connection_info> impl_camera_ref::get_connection_info() const
 {
-    //TODO:;
-}
-
-std::shared_ptr<connection_info> impl_camera_ref::get_connection_info() const
-{
-    auto info = std::make_shared<impl_connection_info>("TODO: Implement", "TODO");
-    
-    return info;
+    return conn_info;
 }
 
 std::shared_ptr<camera_info> impl_camera_ref::get_camera_info()

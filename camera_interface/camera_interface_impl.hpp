@@ -81,12 +81,13 @@ public:
 class impl_camera_ref : public camera_ref
 {
     EdsCameraRef ref;
+    std::shared_ptr<connection_info> conn_info;
     
 public:
     impl_camera_ref(EdsCameraRef camera);
     virtual ~impl_camera_ref();
     
-    std::shared_ptr<connection_info> get_connection_info() const override;
+    std::shared_ptr<const connection_info> get_connection_info() const override;
     std::shared_ptr<camera_info> get_camera_info() override;
 };
 
