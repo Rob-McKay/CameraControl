@@ -31,13 +31,13 @@ impl_camera_list::impl_camera_list() : list(nullptr), count(0)
     if (auto err = EdsGetCameraList(&list); err != EDS_ERR_OK)
     {
         std::cerr << "Failed to get camera list (" << err << ")\n";
-        throw std::runtime_error("Failed to get camera list");
+        throw eds_exception("Failed to get camera list", err, __FUNCTION__);
     }
     
     if (auto err = EdsGetChildCount(list, &listCount); err != EDS_ERR_OK)
     {
         std::cerr << "Failed to get camera list count (" << err << ")\n";
-        throw std::runtime_error("Failed to get camera list count");
+        throw eds_exception("Failed to get camera list count", err, __FUNCTION__);
     }
 
     count = listCount;
@@ -57,14 +57,14 @@ std::shared_ptr<camera_ref> impl_camera_list::at(size_type camera_number)
     if ((camera_number >= size()) || (camera_number > std::numeric_limits<EdsInt32>::max()))
     {
         std::cerr << "Failed to select camera " << camera_number << " (" << EDS_ERR_DEVICE_NOT_FOUND << ")\n";
-        throw std::runtime_error("Failed to select camera - camera not found");
+        throw eds_exception("Failed to select camera - camera not found", EDS_ERR_DEVICE_NOT_FOUND, __FUNCTION__);
     }
     
     EdsCameraRef camera(nullptr);
     if (auto err = EdsGetChildAtIndex(list, static_cast<EdsInt32>(camera_number), &camera); err != EDS_ERR_OK)
     {
         std::cerr << "Failed to select camera " << camera_number << " (" << err << ")\n";
-        throw std::runtime_error("Failed to select camera");
+        throw eds_exception("Failed to select camera", err, __FUNCTION__);
     }
     
     current_camera = std::make_shared<impl_camera_ref>(camera);

@@ -10,9 +10,16 @@
 
 #include <string>
 #include <memory>
+#include <stdexcept>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+
+class eds_exception : public std::runtime_error
+{
+public:
+    eds_exception(std::string message, int err, std::string method = "");
+};
 
 class connection_info
 {

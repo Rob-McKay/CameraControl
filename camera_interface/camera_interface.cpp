@@ -33,7 +33,7 @@ impl_camera_connection::impl_camera_connection()
     if (auto err = EdsInitializeSDK(); err != EDS_ERR_OK)
     {
         std::cerr << "Failed to initialise the EDS SDK (" << err << ")\n";
-        throw std::runtime_error("Failed to initialise the EDS SDK");
+        throw eds_exception("Failed to initialise the EDS SDK", err, __FUNCTION__);
     }
     
     cameras = std::make_unique<impl_camera_list>();

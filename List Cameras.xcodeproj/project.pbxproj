@@ -21,6 +21,7 @@
 		D4ED4BE425A9E79C00F90A7A /* connection_info_impl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */; };
 		D4ED4BEA25A9FE7800F90A7A /* EDSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; };
 		D4ED4BEB25A9FE7800F90A7A /* EDSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D4ED4BEE25AA035500F90A7A /* eds_exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BED25AA035500F90A7A /* eds_exception.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,7 +62,6 @@
 		D4ED4B9525A88A9E00F90A7A /* List Cameras */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "List Cameras"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4ED4B9825A88A9E00F90A7A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EDSDK.framework; path = ../../EDSDKv131300M/Machintosh/EDSDK/Framework/EDSDK.framework; sourceTree = "<group>"; };
-		D4ED4BAA25A8964100F90A7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
 		D4ED4BB025A8B1A600F90A7A /* List Cameras.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "List Cameras.entitlements"; sourceTree = "<group>"; };
 		D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcamera_interface.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4ED4BBA25A8BF3200F90A7A /* camera_interface.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera_interface.hpp; sourceTree = "<group>"; };
@@ -72,6 +72,9 @@
 		D4ED4BDD25A9E2B700F90A7A /* camera_info_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera_info_impl.cpp; sourceTree = "<group>"; };
 		D4ED4BE125A9E79C00F90A7A /* connection_info_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = connection_info_impl.cpp; sourceTree = "<group>"; };
 		D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = connection_info_impl.hpp; sourceTree = "<group>"; };
+		D4ED4BED25AA035500F90A7A /* eds_exception.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eds_exception.cpp; sourceTree = "<group>"; };
+		D4ED4BF125AA0A2900F90A7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
+		D4ED4BF225AA0A3300F90A7A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +101,7 @@
 		D4ED4B8C25A88A9E00F90A7A = {
 			isa = PBXGroup;
 			children = (
+				D4ED4BEF25AA08F400F90A7A /* Info */,
 				D4ED4B9725A88A9E00F90A7A /* List Cameras */,
 				D4ED4BB925A8BF3200F90A7A /* camera_interface */,
 				D4ED4B9625A88A9E00F90A7A /* Products */,
@@ -118,7 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				D4ED4BB025A8B1A600F90A7A /* List Cameras.entitlements */,
-				D4ED4BAA25A8964100F90A7A /* LICENSE */,
 				D4ED4B9825A88A9E00F90A7A /* main.cpp */,
 			);
 			path = "List Cameras";
@@ -143,8 +146,18 @@
 				D4ED4BDD25A9E2B700F90A7A /* camera_info_impl.cpp */,
 				D4ED4BE125A9E79C00F90A7A /* connection_info_impl.cpp */,
 				D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */,
+				D4ED4BED25AA035500F90A7A /* eds_exception.cpp */,
 			);
 			path = camera_interface;
+			sourceTree = "<group>";
+		};
+		D4ED4BEF25AA08F400F90A7A /* Info */ = {
+			isa = PBXGroup;
+			children = (
+				D4ED4BF125AA0A2900F90A7A /* LICENSE */,
+				D4ED4BF225AA0A3300F90A7A /* README.md */,
+			);
+			path = Info;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,6 +262,7 @@
 			files = (
 				D4ED4BDB25A9E01300F90A7A /* camera_list_impl.cpp in Sources */,
 				D4ED4BE325A9E79C00F90A7A /* connection_info_impl.cpp in Sources */,
+				D4ED4BEE25AA035500F90A7A /* eds_exception.cpp in Sources */,
 				D4ED4BD825A9DF3600F90A7A /* camera_ref_impl.cpp in Sources */,
 				D4ED4BDE25A9E2B700F90A7A /* camera_info_impl.cpp in Sources */,
 				D4ED4BBF25A8BF3200F90A7A /* camera_interface.cpp in Sources */,
