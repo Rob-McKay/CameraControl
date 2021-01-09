@@ -14,6 +14,7 @@
 #endif
 
 #include <iostream>
+#include <iomanip>
 
 #if 0
 #include "EDSDK.h"
@@ -140,6 +141,7 @@ EdsError getCameraInfo(EdsCameraRef camera, char* name)
 #endif
 
 #include "camera_interface.hpp"
+constexpr int LABEL_WIDTH = 16;
 
 int main(int argc, const char * argv[])
 {
@@ -156,6 +158,24 @@ int main(int argc, const char * argv[])
             auto camera_ref = cameras->select_camera(cameraNumber);
             auto conn_info = camera_ref->get_connection_info();
             std::cout << "Found camera " << cameraNumber << " on port " << conn_info->get_port() << ": " << conn_info->get_desc() << std::endl;
+            
+            auto camera_info = camera_ref->get_camera_info();
+            std::cout << std::left; // << std::setfill('_');
+            std::cout << std::setw(LABEL_WIDTH) << "Product" << std::setw(0) <<camera_info->get_product_name() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Body" << camera_info->get_body_ID_ex() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Owner Name" << camera_info->get_owner_name() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Maker" << camera_info->get_maker_name() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Date/Time" << camera_info->get_date_time() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Firmware" << camera_info->get_firmware_version() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Battery Level" << camera_info->get_battery_level() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Battery Quality" << camera_info->get_battery_quality() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Save to" << camera_info->get_save_to() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Current Storage" << camera_info->get_current_storage() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Current Folder" << camera_info->get_current_folder() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << camera_info->get_lens_status() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Artist" << camera_info->get_artist() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Copyright" << camera_info->get_copyright() << std::endl;
+
         }
         
 //    // Get first camera

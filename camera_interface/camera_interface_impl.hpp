@@ -25,6 +25,43 @@
 
 namespace implementation
 {
+class camera_ref_lock
+{
+    EdsCameraRef ref;
+    
+public:
+    camera_ref_lock(EdsCameraRef ref) : ref(ref)
+    {
+        EdsRetain(ref);
+    }
+
+    camera_ref_lock(const camera_ref_lock& other) : ref(other.ref)
+    {
+        EdsRetain(ref);
+    }
+
+    camera_ref_lock(camera_ref_lock&& other)
+    {
+        std::swap(ref, other.ref);
+    }
+
+    camera_ref_lock& operator=(const camera_ref_lock& other) = delete;
+    camera_ref_lock& operator=(camera_ref_lock&& other)
+    {
+        std::swap(ref, other.ref);
+        return *this;
+    }
+
+    ~camera_ref_lock()
+    {
+        if (ref != nullptr)
+            EdsRelease(ref);
+        ref = nullptr;
+    }
+    
+    EdsCameraRef get_ref() const {return ref;}
+};
+
 class impl_connection_info: public connection_info
 {
     std::string port;
@@ -39,6 +76,26 @@ public:
     
     std::string get_port() const override;
     std::string get_desc() const override;
+};
+
+class impl_camera_session
+{
+    camera_ref_lock ref;
+public:
+    impl_camera_session(camera_ref_lock ref) : ref(ref)
+    {
+        if (ref.get_ref() != nullptr)
+        {
+            EdsOpenSession(ref.get_ref());
+        }
+    }
+    ~impl_camera_session()
+    {
+        if (ref.get_ref() != nullptr)
+        {
+            EdsCloseSession(ref.get_ref());
+        }
+    }
 };
 
 class impl_camera_info : public camera_info
@@ -74,13 +131,13 @@ public:
     std::string get_artist() const override {return artist; };
     std::string get_copyright() const override {return copyright; };
     
-    impl_camera_info();
+    impl_camera_info(camera_ref_lock ref);
     virtual ~impl_camera_info() noexcept;
 };
 
 class impl_camera_ref : public camera_ref
 {
-    EdsCameraRef ref;
+    camera_ref_lock ref;
     std::shared_ptr<connection_info> conn_info;
     
 public:
@@ -120,7 +177,6 @@ public:
     impl_camera_connection();
     virtual ~impl_camera_connection();
 };
-
 
 }
 

@@ -24,10 +24,9 @@ namespace implementation
 {
 impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
 {
-    EdsRetain(ref);
     EdsDeviceInfo device_info;
     
-    if (auto err = EdsGetDeviceInfo(ref, &device_info); err != EDS_ERR_OK)
+    if (auto err = EdsGetDeviceInfo(ref.get_ref(), &device_info); err != EDS_ERR_OK)
     {
         throw eds_exception("Failed to get device info", err, __FUNCTION__);
     }
@@ -36,9 +35,7 @@ impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
 }
 
 impl_camera_ref::~impl_camera_ref()
-{
-    EdsRelease(ref);
-}
+{}
 
 std::shared_ptr<const connection_info> impl_camera_ref::get_connection_info() const
 {
@@ -47,7 +44,7 @@ std::shared_ptr<const connection_info> impl_camera_ref::get_connection_info() co
 
 std::shared_ptr<camera_info> impl_camera_ref::get_camera_info()
 {
-    auto cam = std::make_shared<impl_camera_info>();
+    auto cam = std::make_shared<impl_camera_info>(ref);
     
     return cam;
 }

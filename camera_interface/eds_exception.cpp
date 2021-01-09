@@ -19,7 +19,9 @@
 
 static std::string format_error(std::string message, int err, std::string method)
 {
-    return message + " (Error " + std::to_string(err) + ((!method.empty()) ? (" in method " + method):"") + ")";
+    char buffer[42];
+    sprintf(buffer, " (Error %d [0x%x]", err, err);
+    return message + buffer + ((!method.empty()) ? (" in method " + method):"") + ")";
 }
 
 eds_exception::eds_exception(std::string message, int err, std::string method) : std::runtime_error(format_error(message, err, method))
