@@ -7,10 +7,32 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D4ED4B9925A88A9E00F90A7A /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4B9825A88A9E00F90A7A /* main.c */; };
+		D4ED4B9925A88A9E00F90A7A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4B9825A88A9E00F90A7A /* main.cpp */; };
 		D4ED4BAC25A8B14C00F90A7A /* EDSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; };
-		D4ED4BB325A8B1C200F90A7A /* EDSDK.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D4ED4BBB25A8BF3200F90A7A /* camera_interface.hpp in Headers */ = {isa = PBXBuildFile; fileRef = D4ED4BBA25A8BF3200F90A7A /* camera_interface.hpp */; };
+		D4ED4BBD25A8BF3200F90A7A /* camera_interface_impl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = D4ED4BBC25A8BF3200F90A7A /* camera_interface_impl.hpp */; };
+		D4ED4BBF25A8BF3200F90A7A /* camera_interface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BBE25A8BF3200F90A7A /* camera_interface.cpp */; };
+		D4ED4BC925A8CF1E00F90A7A /* libcamera_interface.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */; };
+		D4ED4BCA25A8CF1E00F90A7A /* libcamera_interface.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		D4ED4BD825A9DF3600F90A7A /* camera_ref_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BD725A9DF3600F90A7A /* camera_ref_impl.cpp */; };
+		D4ED4BDB25A9E01300F90A7A /* camera_list_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BDA25A9E01300F90A7A /* camera_list_impl.cpp */; };
+		D4ED4BDE25A9E2B700F90A7A /* camera_info_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BDD25A9E2B700F90A7A /* camera_info_impl.cpp */; };
+		D4ED4BE325A9E79C00F90A7A /* connection_info_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BE125A9E79C00F90A7A /* connection_info_impl.cpp */; };
+		D4ED4BE425A9E79C00F90A7A /* connection_info_impl.hpp in Headers */ = {isa = PBXBuildFile; fileRef = D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */; };
+		D4ED4BEA25A9FE7800F90A7A /* EDSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; };
+		D4ED4BEB25A9FE7800F90A7A /* EDSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D4ED4BEE25AA035500F90A7A /* eds_exception.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D4ED4BED25AA035500F90A7A /* eds_exception.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D4ED4BCB25A8CF1E00F90A7A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D4ED4B8D25A88A9E00F90A7A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4ED4BB725A8BF3200F90A7A;
+			remoteInfo = camera_interface;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		D4ED4BB225A8B1B500F90A7A /* CopyFiles */ = {
@@ -19,18 +41,40 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				D4ED4BB325A8B1C200F90A7A /* EDSDK.framework in CopyFiles */,
+				D4ED4BCA25A8CF1E00F90A7A /* libcamera_interface.dylib in CopyFiles */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4ED4BEC25A9FE7800F90A7A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D4ED4BEB25A9FE7800F90A7A /* EDSDK.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		D4ED4B9525A88A9E00F90A7A /* List Cameras */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "List Cameras"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4ED4B9825A88A9E00F90A7A /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		D4ED4B9825A88A9E00F90A7A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D4ED4BA525A88CBF00F90A7A /* EDSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EDSDK.framework; path = ../../EDSDKv131300M/Machintosh/EDSDK/Framework/EDSDK.framework; sourceTree = "<group>"; };
-		D4ED4BAA25A8964100F90A7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
 		D4ED4BB025A8B1A600F90A7A /* List Cameras.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "List Cameras.entitlements"; sourceTree = "<group>"; };
+		D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcamera_interface.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4ED4BBA25A8BF3200F90A7A /* camera_interface.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera_interface.hpp; sourceTree = "<group>"; };
+		D4ED4BBC25A8BF3200F90A7A /* camera_interface_impl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera_interface_impl.hpp; sourceTree = "<group>"; };
+		D4ED4BBE25A8BF3200F90A7A /* camera_interface.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera_interface.cpp; sourceTree = "<group>"; };
+		D4ED4BD725A9DF3600F90A7A /* camera_ref_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera_ref_impl.cpp; sourceTree = "<group>"; };
+		D4ED4BDA25A9E01300F90A7A /* camera_list_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera_list_impl.cpp; sourceTree = "<group>"; };
+		D4ED4BDD25A9E2B700F90A7A /* camera_info_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera_info_impl.cpp; sourceTree = "<group>"; };
+		D4ED4BE125A9E79C00F90A7A /* connection_info_impl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = connection_info_impl.cpp; sourceTree = "<group>"; };
+		D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = connection_info_impl.hpp; sourceTree = "<group>"; };
+		D4ED4BED25AA035500F90A7A /* eds_exception.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eds_exception.cpp; sourceTree = "<group>"; };
+		D4ED4BF125AA0A2900F90A7A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = SOURCE_ROOT; };
+		D4ED4BF225AA0A3300F90A7A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,6 +83,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4ED4BAC25A8B14C00F90A7A /* EDSDK.framework in Frameworks */,
+				D4ED4BC925A8CF1E00F90A7A /* libcamera_interface.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4ED4BB625A8BF3200F90A7A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4ED4BEA25A9FE7800F90A7A /* EDSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,7 +101,9 @@
 		D4ED4B8C25A88A9E00F90A7A = {
 			isa = PBXGroup;
 			children = (
+				D4ED4BEF25AA08F400F90A7A /* Info */,
 				D4ED4B9725A88A9E00F90A7A /* List Cameras */,
+				D4ED4BB925A8BF3200F90A7A /* camera_interface */,
 				D4ED4B9625A88A9E00F90A7A /* Products */,
 				D4ED4BA025A88AE500F90A7A /* Frameworks */,
 			);
@@ -58,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				D4ED4B9525A88A9E00F90A7A /* List Cameras */,
+				D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,8 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				D4ED4BB025A8B1A600F90A7A /* List Cameras.entitlements */,
-				D4ED4BAA25A8964100F90A7A /* LICENSE */,
-				D4ED4B9825A88A9E00F90A7A /* main.c */,
+				D4ED4B9825A88A9E00F90A7A /* main.cpp */,
 			);
 			path = "List Cameras";
 			sourceTree = "<group>";
@@ -80,7 +135,45 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		D4ED4BB925A8BF3200F90A7A /* camera_interface */ = {
+			isa = PBXGroup;
+			children = (
+				D4ED4BBA25A8BF3200F90A7A /* camera_interface.hpp */,
+				D4ED4BBC25A8BF3200F90A7A /* camera_interface_impl.hpp */,
+				D4ED4BBE25A8BF3200F90A7A /* camera_interface.cpp */,
+				D4ED4BD725A9DF3600F90A7A /* camera_ref_impl.cpp */,
+				D4ED4BDA25A9E01300F90A7A /* camera_list_impl.cpp */,
+				D4ED4BDD25A9E2B700F90A7A /* camera_info_impl.cpp */,
+				D4ED4BE125A9E79C00F90A7A /* connection_info_impl.cpp */,
+				D4ED4BE225A9E79C00F90A7A /* connection_info_impl.hpp */,
+				D4ED4BED25AA035500F90A7A /* eds_exception.cpp */,
+			);
+			path = camera_interface;
+			sourceTree = "<group>";
+		};
+		D4ED4BEF25AA08F400F90A7A /* Info */ = {
+			isa = PBXGroup;
+			children = (
+				D4ED4BF125AA0A2900F90A7A /* LICENSE */,
+				D4ED4BF225AA0A3300F90A7A /* README.md */,
+			);
+			path = Info;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D4ED4BB425A8BF3200F90A7A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4ED4BE425A9E79C00F90A7A /* connection_info_impl.hpp in Headers */,
+				D4ED4BBD25A8BF3200F90A7A /* camera_interface_impl.hpp in Headers */,
+				D4ED4BBB25A8BF3200F90A7A /* camera_interface.hpp in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		D4ED4B9425A88A9E00F90A7A /* List Cameras */ = {
@@ -94,11 +187,30 @@
 			buildRules = (
 			);
 			dependencies = (
+				D4ED4BCC25A8CF1E00F90A7A /* PBXTargetDependency */,
 			);
 			name = "List Cameras";
 			productName = "List Cameras";
 			productReference = D4ED4B9525A88A9E00F90A7A /* List Cameras */;
 			productType = "com.apple.product-type.tool";
+		};
+		D4ED4BB725A8BF3200F90A7A /* camera_interface */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4ED4BC025A8BF3200F90A7A /* Build configuration list for PBXNativeTarget "camera_interface" */;
+			buildPhases = (
+				D4ED4BB425A8BF3200F90A7A /* Headers */,
+				D4ED4BB525A8BF3200F90A7A /* Sources */,
+				D4ED4BB625A8BF3200F90A7A /* Frameworks */,
+				D4ED4BEC25A9FE7800F90A7A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = camera_interface;
+			productName = camera_interface;
+			productReference = D4ED4BB825A8BF3200F90A7A /* libcamera_interface.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
 
@@ -109,6 +221,9 @@
 				LastUpgradeCheck = 1230;
 				TargetAttributes = {
 					D4ED4B9425A88A9E00F90A7A = {
+						CreatedOnToolsVersion = 12.3;
+					};
+					D4ED4BB725A8BF3200F90A7A = {
 						CreatedOnToolsVersion = 12.3;
 					};
 				};
@@ -127,6 +242,7 @@
 			projectRoot = "";
 			targets = (
 				D4ED4B9425A88A9E00F90A7A /* List Cameras */,
+				D4ED4BB725A8BF3200F90A7A /* camera_interface */,
 			);
 		};
 /* End PBXProject section */
@@ -136,11 +252,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4ED4B9925A88A9E00F90A7A /* main.c in Sources */,
+				D4ED4B9925A88A9E00F90A7A /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D4ED4BB525A8BF3200F90A7A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4ED4BDB25A9E01300F90A7A /* camera_list_impl.cpp in Sources */,
+				D4ED4BE325A9E79C00F90A7A /* connection_info_impl.cpp in Sources */,
+				D4ED4BEE25AA035500F90A7A /* eds_exception.cpp in Sources */,
+				D4ED4BD825A9DF3600F90A7A /* camera_ref_impl.cpp in Sources */,
+				D4ED4BDE25A9E2B700F90A7A /* camera_info_impl.cpp in Sources */,
+				D4ED4BBF25A8BF3200F90A7A /* camera_interface.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D4ED4BCC25A8CF1E00F90A7A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D4ED4BB725A8BF3200F90A7A /* camera_interface */;
+			targetProxy = D4ED4BCB25A8CF1E00F90A7A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		D4ED4B9A25A88A9E00F90A7A /* Debug */ = {
@@ -150,7 +287,7 @@
 				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -179,6 +316,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 2Q822V5HRV;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = ../../EDSDKv131300M/Machintosh/EDSDK/Framework/;
@@ -192,6 +330,7 @@
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -212,7 +351,7 @@
 				ARCHS = x86_64;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -241,6 +380,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 2Q822V5HRV;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = ../../EDSDKv131300M/Machintosh/EDSDK/Framework/;
@@ -248,6 +388,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_PEDANTIC = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -284,6 +425,39 @@
 			};
 			name = Release;
 		};
+		D4ED4BC125A8BF3200F90A7A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_ASSET_PATHS = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		D4ED4BC225A8BF3200F90A7A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEVELOPMENT_ASSET_PATHS = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -301,6 +475,15 @@
 			buildConfigurations = (
 				D4ED4B9D25A88A9E00F90A7A /* Debug */,
 				D4ED4B9E25A88A9E00F90A7A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4ED4BC025A8BF3200F90A7A /* Build configuration list for PBXNativeTarget "camera_interface" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4ED4BC125A8BF3200F90A7A /* Debug */,
+				D4ED4BC225A8BF3200F90A7A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

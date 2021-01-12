@@ -1,0 +1,3 @@
+// the configured options and settings for lscamera
+#define LSCAMERA_VERSION_MAJOR @lscamera_VERSION_MAJOR@
+#define LSCAMERA_VERSION_MINOR @lscamera_VERSION_MINOR@

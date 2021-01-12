@@ -1,0 +1,55 @@
+//
+//  camera_ref_impl.cpp
+//  camera_interface
+//
+//  Created by Rob McKay on 09/01/2021.
+//
+
+#if !defined __MACOS__
+#if defined __APPLE__ && defined __MACH__
+#define __MACOS__ 1
+#else
+#error "Only for MacOS"
+#endif
+#endif
+
+#include <cstdio>
+#include <iostream>
+#include "camera_interface.hpp"
+#include "camera_interface_impl.hpp"
+
+#include "EDSDK.h"
+
+#include "Poco/Logger.h"
+
+namespace implementation
+{
+impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
+{
+    EdsDeviceInfo device_info;
+    
+    if (auto err = EdsGetDeviceInfo(ref.get_ref(), &device_info); err != EDS_ERR_OK)
+    {
+            Poco::Logger::get("camera_ref").error("Failed to get device info (%lu)", err);
+        throw eds_exception("Failed to get device info", err, __FUNCTION__);
+    }
+    
+    conn_info = std::make_shared<impl_connection_info>(device_info.szPortName, device_info.szDeviceDescription);
+}
+
+impl_camera_ref::~impl_camera_ref()
+{}
+
+std::shared_ptr<const connection_info> impl_camera_ref::get_connection_info() const
+{
+    return conn_info;
+}
+
+std::shared_ptr<camera_info> impl_camera_ref::get_camera_info()
+{
+    auto cam = std::make_shared<impl_camera_info>(ref);
+    
+    return cam;
+}
+
+}
