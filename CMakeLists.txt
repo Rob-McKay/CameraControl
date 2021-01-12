@@ -20,7 +20,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 
 add_subdirectory(camera_interface)
 
-add_executable(lscamera "List Cameras/main.cpp")
+add_executable(lscamera "CameraControl/main.cpp")
 target_link_libraries(lscamera PUBLIC Poco::Poco camera_interface)
 target_include_directories(lscamera PUBLIC 
     "${PROJECT_BINARY_DIR}"

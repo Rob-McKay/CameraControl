@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/.conan/data/**",
-                "/Users/rob/.conan/data/poco/1.10.1/_/_/package/34a6c702ce9a644ee0bbc302509f3a148490d148/include"
+                "/Users/rob/.conan/data/poco/1.10.1/_/_/package/34a6c702ce9a644ee0bbc302509f3a148490d148/include",
+                "${workspaceFolder}/build"
             ],
             "defines": [],
             "macFrameworkPath": [
@@ -15,7 +16,8 @@
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "clang-x64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4
