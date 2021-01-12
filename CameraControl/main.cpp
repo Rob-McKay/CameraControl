@@ -10,6 +10,8 @@
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/IntValidator.h"
 
+#include "LSCameraConfig.h"
+
 #if !defined __MACOS__
 #if defined __APPLE__ && defined __MACH__
 #define __MACOS__ 1
@@ -185,12 +187,15 @@ public:
         Application::initialize(self);
     }
 
+#define STR2(x) #x
+#define STR(x) STR2(x)
+
     void display_help()
     {
         HelpFormatter helpFormatter(options());
         helpFormatter.setCommand(commandName());
         helpFormatter.setUsage("OPTIONS");
-        helpFormatter.setHeader("List Canon cameras connect to the computer (via USB)");
+        helpFormatter.setHeader("\n" + commandName() + " Version " STR(LSCAMERA_VERSION_MAJOR) "." STR(LSCAMERA_VERSION_MINOR) "\n\nList Canon cameras connect to the computer (via USB)");
         helpFormatter.format(std::cout);
     }
 
@@ -203,6 +208,9 @@ public:
 
     int main(const std::vector<std::string> &) override
     {
+        if (help_requested)
+            return EXIT_USAGE;
+            
         const int count = cameras->number_of_cameras();
 
         if (count < 1)
