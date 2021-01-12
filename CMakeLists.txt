@@ -24,4 +24,8 @@ add_executable(lscamera "List Cameras/main.cpp")
 target_link_libraries(lscamera PUBLIC Poco::Poco camera_interface)
 target_include_directories(lscamera PUBLIC 
     "${PROJECT_BINARY_DIR}"
+    ${Poco_INCLUDE_DIRS}
     )
+
+
+#target_link_libraries(lscamera PUBLIC Poco::Util)

@@ -20,6 +20,8 @@
 
 #include "EDSDK.h"
 
+#include "Poco/Logger.h"
+
 namespace implementation
 {
 impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
@@ -28,6 +30,7 @@ impl_camera_ref::impl_camera_ref(EdsCameraRef camera) : ref(camera)
     
     if (auto err = EdsGetDeviceInfo(ref.get_ref(), &device_info); err != EDS_ERR_OK)
     {
+            Poco::Logger::get("camera_ref").error("Failed to get device info (%lu)", err);
         throw eds_exception("Failed to get device info", err, __FUNCTION__);
     }
     

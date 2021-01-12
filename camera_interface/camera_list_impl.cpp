@@ -20,60 +20,62 @@
 
 #include "EDSDK.h"
 
+#include "Poco/Logger.h"
 
 namespace implementation
 {
-impl_camera_list::impl_camera_list() : list(nullptr), count(0)
-{
-    EdsUInt32 listCount = 0;
-       
-    // Get camera list
-    if (auto err = EdsGetCameraList(&list); err != EDS_ERR_OK)
+    impl_camera_list::impl_camera_list() : list(nullptr), count(0)
     {
-        std::cerr << "Failed to get camera list (" << err << ")\n";
-        throw eds_exception("Failed to get camera list", err, __FUNCTION__);
-    }
-    
-    if (auto err = EdsGetChildCount(list, &listCount); err != EDS_ERR_OK)
-    {
-        std::cerr << "Failed to get camera list count (" << err << ")\n";
-        throw eds_exception("Failed to get camera list count", err, __FUNCTION__);
+        EdsUInt32 listCount = 0;
+
+        // Get camera list
+        if (auto err = EdsGetCameraList(&list); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("camera_list").error("Failed to get camera list (%lu)", err);
+
+            throw eds_exception("Failed to get camera list", err, __FUNCTION__);
+        }
+
+        if (auto err = EdsGetChildCount(list, &listCount); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("camera_list").error("Failed to get camera list count (%lu)", err);
+            throw eds_exception("Failed to get camera list count", err, __FUNCTION__);
+        }
+
+        count = listCount;
     }
 
-    count = listCount;
-}
-
-impl_camera_list::~impl_camera_list()
-{
-    if (list != nullptr)
+    impl_camera_list::~impl_camera_list()
     {
-        EdsRelease(list);
-        list = nullptr;
+        if (list != nullptr)
+        {
+            EdsRelease(list);
+            list = nullptr;
+        }
     }
-}
 
-std::shared_ptr<camera_ref> impl_camera_list::at(size_type camera_number)
-{
-    if ((camera_number >= size()) || (camera_number > std::numeric_limits<EdsInt32>::max()))
+    std::shared_ptr<camera_ref> impl_camera_list::at(size_type camera_number)
     {
-        std::cerr << "Failed to select camera " << camera_number << " (" << EDS_ERR_DEVICE_NOT_FOUND << ")\n";
-        throw eds_exception("Failed to select camera - camera not found", EDS_ERR_DEVICE_NOT_FOUND, __FUNCTION__);
+        if ((camera_number >= size()) || (camera_number > std::numeric_limits<EdsInt32>::max()))
+        {
+            Poco::Logger::get("camera_list").error("Failed to select camera (%d)", camera_number);
+            throw eds_exception("Failed to select camera - camera not found", EDS_ERR_DEVICE_NOT_FOUND, __FUNCTION__);
+        }
+
+        EdsCameraRef camera(nullptr);
+        if (auto err = EdsGetChildAtIndex(list, static_cast<EdsInt32>(camera_number), &camera); err != EDS_ERR_OK)
+        {
+                        Poco::Logger::get("camera_list").error("Failed to select camera (%lu)", err);
+            throw eds_exception("Failed to select camera", err, __FUNCTION__);
+        }
+
+        current_camera = std::make_shared<impl_camera_ref>(camera);
+        return current_camera;
     }
-    
-    EdsCameraRef camera(nullptr);
-    if (auto err = EdsGetChildAtIndex(list, static_cast<EdsInt32>(camera_number), &camera); err != EDS_ERR_OK)
+
+    impl_camera_list::size_type impl_camera_list::size() const noexcept
     {
-        std::cerr << "Failed to select camera " << camera_number << " (" << err << ")\n";
-        throw eds_exception("Failed to select camera", err, __FUNCTION__);
+        return count;
     }
-    
-    current_camera = std::make_shared<impl_camera_ref>(camera);
-    return current_camera;
-}
 
-impl_camera_list::size_type impl_camera_list::size() const noexcept
-{
-    return count;
-}
-
-}
+} // namespace implementation

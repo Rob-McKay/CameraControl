@@ -20,6 +20,8 @@
 
 #include "EDSDK.h"
 
+#include "Poco/Logger.h"
+
 std::unique_ptr<camera_connection> get_camera_connection()
 {
     return std::make_unique<implementation::impl_camera_connection>();
@@ -27,35 +29,34 @@ std::unique_ptr<camera_connection> get_camera_connection()
 
 namespace implementation
 {
-impl_camera_connection::impl_camera_connection()
-{
-    // Initialize SDK
-    if (auto err = EdsInitializeSDK(); err != EDS_ERR_OK)
+    impl_camera_connection::impl_camera_connection()
     {
-        std::cerr << "Failed to initialise the EDS SDK (" << err << ")\n";
-        throw eds_exception("Failed to initialise the EDS SDK", err, __FUNCTION__);
+        // Initialize SDK
+        if (auto err = EdsInitializeSDK(); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("camera_connection").error("Failed to initialise the EDS SDK (%lu)", err);
+            throw eds_exception("Failed to initialise the EDS SDK", err, __FUNCTION__);
+        }
+
+        cameras = std::make_unique<impl_camera_list>();
     }
-    
-    cameras = std::make_unique<impl_camera_list>();
-}
 
-impl_camera_connection::~impl_camera_connection()
-{
-    // Tidyup SDK
-    EdsTerminateSDK();
-}
+    impl_camera_connection::~impl_camera_connection()
+    {
+        // Tidyup SDK
+        EdsTerminateSDK();
+    }
 
-std::shared_ptr<camera_ref> impl_camera_connection::select_camera(size_type camera_number)
-{
-    return cameras->at(camera_number);
-}
+    std::shared_ptr<camera_ref> impl_camera_connection::select_camera(size_type camera_number)
+    {
+        return cameras->at(camera_number);
+    }
 
-int impl_camera_connection::number_of_cameras() const
-{
-    auto count = cameras->size();
-    
-    return (count < std::numeric_limits<int>::max()) ? static_cast<int>(count) : std::numeric_limits<int>::max();
-}
+    int impl_camera_connection::number_of_cameras() const
+    {
+        auto count = cameras->size();
 
-}
+        return (count < std::numeric_limits<int>::max()) ? static_cast<int>(count) : std::numeric_limits<int>::max();
+    }
 
+} // namespace implementation

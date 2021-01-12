@@ -29,4 +29,5 @@ target_include_directories(camera_interface
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     ${CanonEDSDK}/Header
     ${CMAKE_MODULE_PATH}
+    ${Poco_INCLUDE_DIRS}
     )
