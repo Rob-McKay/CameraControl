@@ -1,0 +1,3 @@
+[submodule "CanonEDSDK"]
+	path = CanonEDSDK
+	url = https://github.com/Rob-McKay/CanonEDSDK.git
