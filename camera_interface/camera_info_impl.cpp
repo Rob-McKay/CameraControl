@@ -22,6 +22,10 @@
 
 #include "EDSDK.h"
 
+#include "Poco/LocalDateTime.h"
+#include "Poco/DateTimeFormat.h"
+#include "Poco/DateTimeFormatter.h"
+
 using namespace std::string_literals;
 
 namespace implementation
@@ -100,6 +104,18 @@ static uint32_t get_camera_property_uint32(camera_ref_lock& ref, EdsPropertyID i
     return buffer;
 }
 
+static Poco::LocalDateTime get_camera_property_datetime(camera_ref_lock& ref, EdsPropertyID id)
+{
+    ensure_data_type_is(kEdsDataType_Time, id, ref);
+    EdsTime dt;
+    if (auto err = EdsGetPropertyData(ref.get_ref(), id, 0, sizeof(dt), &dt); err != EDS_ERR_OK)
+    {
+        throw eds_exception("Failed to read camera property "s + std::to_string(id), err, __FUNCTION__);
+    }
+    
+    return Poco::LocalDateTime(dt.year, dt.month,dt.day, dt.hour, dt.minute, dt.second, dt.milliseconds);
+}
+
 impl_camera_info::impl_camera_info(camera_ref_lock ref)
 {
     impl_camera_session session(ref);
@@ -108,7 +124,8 @@ impl_camera_info::impl_camera_info(camera_ref_lock ref)
     body_ID_ex = get_camera_property_string(ref, kEdsPropID_BodyIDEx);
     owner_name = get_camera_property_string(ref, kEdsPropID_OwnerName);
     maker_name = is_property_available(ref, kEdsPropID_MakerName)?get_camera_property_string(ref, kEdsPropID_MakerName) : UNKNOWN;
-    //date_time = get_camera_property_string(ref, kEdsPropID_DateTime);
+    date_time = is_property_available(ref, kEdsPropID_DateTime)?
+        Poco::DateTimeFormatter::format(get_camera_property_datetime(ref, kEdsPropID_DateTime), "%d-%b-%Y %H:%M:%S"s) : UNKNOWN;
     firmware_version = get_camera_property_string(ref, kEdsPropID_FirmwareVersion);
     battery_level = std::to_string(get_camera_property_int32(ref, kEdsPropID_BatteryLevel));
     battery_quality = is_property_available(ref, kEdsPropID_BatteryQuality) ? std::to_string(get_camera_property_uint32(ref, kEdsPropID_BatteryQuality)) : UNKNOWN;
