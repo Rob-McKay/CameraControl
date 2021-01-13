@@ -52,11 +52,9 @@ namespace implementation
         return cameras->at(camera_number);
     }
 
-    int impl_camera_connection::number_of_cameras() const
+    camera_connection::size_type impl_camera_connection::number_of_cameras() const
     {
-        auto count = cameras->size();
-
-        return (count < std::numeric_limits<int>::max()) ? static_cast<int>(count) : std::numeric_limits<int>::max();
+        return cameras->size();
     }
 
 } // namespace implementation

@@ -59,7 +59,8 @@ namespace implementation
         if ((camera_number >= size()) || (camera_number > std::numeric_limits<EdsInt32>::max()))
         {
             Poco::Logger::get("camera_list").error("Failed to select camera (%d)", camera_number);
-            throw eds_exception("Failed to select camera - camera not found", EDS_ERR_DEVICE_NOT_FOUND, __FUNCTION__);
+            throw std::out_of_range("Camera number too big");
+            // throw eds_exception("Failed to select camera - camera not found", EDS_ERR_DEVICE_NOT_FOUND, __FUNCTION__);
         }
 
         EdsCameraRef camera(nullptr);

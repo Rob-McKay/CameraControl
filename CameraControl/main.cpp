@@ -70,83 +70,6 @@ static EdsError EDSCALLBACK handleStateEvent (EdsStateEvent event, EdsUInt32 par
     return EDS_ERR_OK;
 }
 
-static EdsError getCameraCount()
-{
-    EdsError err = EDS_ERR_OK;
-    EdsCameraListRef cameraList = NULL;
-    EdsUInt32 count = 0;
-       
-    // Get camera list
-    err = EdsGetCameraList(&cameraList);
-    
-    // Get number of cameras
-    if (err == EDS_ERR_OK)
-    {
-        err = EdsGetChildCount(cameraList, &count);
-    }
-    
-    // Release camera list
-    if (cameraList != NULL)
-    {
-        EdsRelease(cameraList);
-        cameraList = NULL;
-    }
-
-    return count;
-}
-
-static EdsError getCamera(const int cameraNumber, EdsCameraRef *camera)
-{
-    EdsError err = EDS_ERR_OK;
-    EdsCameraListRef cameraList = NULL;
-    EdsUInt32 count = 0;
-    *camera = NULL;
-    
-    // Get camera list
-    err = EdsGetCameraList(&cameraList);
-    
-    // Get number of cameras
-    if (err == EDS_ERR_OK)
-    {
-        err = EdsGetChildCount(cameraList, &count);
-        if (count <= cameraNumber)
-        {
-            printf("Camera %d found\n", cameraNumber);
-            err = EDS_ERR_DEVICE_NOT_FOUND;
-        }
-    }
-    
-    // Get the camera retrieved
-    if (err == EDS_ERR_OK)
-    {
-        err = EdsGetChildAtIndex(cameraList, cameraNumber , camera);
-    }
-    
-    // Release camera list
-    if (cameraList != NULL)
-    {
-        EdsRelease(cameraList);
-        cameraList = NULL;
-    }
-    
-    return err;
-}
-
-EdsError getCameraInfo(EdsCameraRef camera, char* name)
-{
-    EdsError err = EDS_ERR_OK;
-    EdsDataType dataType;
-    EdsUInt32 dataSize;
-    
-    *name = 0;
-    
-    err = EdsGetPropertySize(camera, kEdsPropID_ProductName, 0 , &dataType, &dataSize);
-    if(err == EDS_ERR_OK)
-    {
-        err = EdsGetPropertyData(camera, kEdsPropID_ProductName, 0 , dataSize, name);
-    }
-    return err;
-}
 #endif
 
 #include "camera_interface.hpp"
@@ -210,12 +133,12 @@ public:
     {
         if (help_requested)
             return EXIT_USAGE;
-            
+
         const int count = cameras->number_of_cameras();
 
         if (count < 1)
         {
-            std::cout << "No cameras found\n";
+            std::cerr << "No cameras found\n";
             return EXIT_FAILURE;
         }
 
@@ -223,7 +146,7 @@ public:
         {
             auto camera_ref = cameras->select_camera(cameraNumber);
             auto conn_info = camera_ref->get_connection_info();
-            std::cout << "Found camera " << cameraNumber << " on port " << conn_info->get_port() << ": " << conn_info->get_desc() << std::endl;
+            logger().debug("Found camera %d  on port %s: %s", cameraNumber, conn_info->get_port(), conn_info->get_desc());
 
             auto camera_info = camera_ref->get_camera_info();
             std::cout << std::left; // << std::setfill('_');
@@ -238,23 +161,13 @@ public:
             std::cout << std::setw(LABEL_WIDTH) << "Save to" << camera_info->get_save_to() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Current Storage" << camera_info->get_current_storage() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Current Folder" << camera_info->get_current_folder() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << camera_info->get_lens_status() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << (camera_info->get_lens_status()?"Lens Attached": "No Lens") << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Lens Name" << camera_info->get_lens_name() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Artist" << camera_info->get_artist() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Copyright" << camera_info->get_copyright() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Available Shots" << camera_info->get_available_shots() << std::endl;
         }
 
-        //    // Get first camera
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Getting first camera\n");
-        //        err = getCamera(0, &camera);
-        //    }
-        //
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //
-        //    }
-        //
         //    // Set Object event handler
         //    if(err == EDS_ERR_OK)
         //    {
@@ -300,19 +213,6 @@ public:
         //        }
         //    }
         //
-        //    // Close session with camera
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Closing session\n");
-        //        err = EdsCloseSession(camera);
-        //    }
-        //
-        //    // Release camera
-        //    if(camera != NULL)
-        //    {
-        //        printf("Releasing camera\n");
-        //        EdsRelease(camera);
-        //    }
 
         return EXIT_OK;
     }
