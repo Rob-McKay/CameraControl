@@ -12,68 +12,16 @@
 
 #include "LSCameraConfig.h"
 
-#if !defined __MACOS__
-#if defined __APPLE__ && defined __MACH__
-#define __MACOS__ 1
-#else
-#error "Only for MacOS"
-#endif
-#endif
-
 #include <iostream>
 #include <iomanip>
 
 using namespace Poco::Util;
 
-#if 0
-#include "EDSDK.h"
-#include <stdbool.h>
-
-// Private functions
-
-static EdsError EDSCALLBACK handleObjectEvent( EdsObjectEvent event, EdsBaseRef object, EdsVoid * context)
-{
-    // do something
-    /*
-     switch(event)
-     {
-     case kEdsObjectEvent_DirItemRequestTransfer:
-     downloadImage(object);
-     break;
-     default:
-     break;
-     }
-     */
-    
-    // Object must be released
-    if (object)
-    {
-        EdsRelease(object);
-    }
-    
-    return EDS_ERR_OK;
-}
-
-
-static EdsError EDSCALLBACK handlePropertyEvent (EdsPropertyEvent event, EdsPropertyID property, EdsUInt32 param, EdsVoid * context)
-{
-    // do something
-    
-    return EDS_ERR_OK;
-}
-
-
-static EdsError EDSCALLBACK handleStateEvent (EdsStateEvent event, EdsUInt32 parameter, EdsVoid * context)
-{
-    // do something
-    
-    return EDS_ERR_OK;
-}
-
-#endif
-
 #include "camera_interface.hpp"
+
 constexpr int LABEL_WIDTH = 16;
+constexpr int DEFAULT_CAMERA_NUMBER = 0;
+
 class my_app : public Poco::Util::Application
 {
     bool help_requested = false;
@@ -89,7 +37,7 @@ public:
     {
         Application::defineOptions(options);
         options.addOption(
-            Option("help", "h", "display help information")
+            Option("help", "h", "Display help information")
                 .required(false)
                 .repeatable(false)
                 .callback(OptionCallback<my_app>(this, &my_app::handle_help)));
@@ -97,11 +45,16 @@ public:
         const int count = cameras->number_of_cameras();
 
         options.addOption(
-            Option("camera-number", "c", "Choose camera number <c>")
+            Option("camera-number", "c", "Choose camera (0..n-1)")
                 .required(false)
-                .argument("value")
+                .argument("camera")
                 .validator(new IntValidator(0, count))
-                .binding("camera.number"));
+                .binding("camera_number"));
+
+        options.addOption(
+            Option("files", "f", "Display file information for the selected camera, or camera 0 if no other camera is selected")
+                .required(false)
+                .binding("show_files"));
     }
 
     void initialize(Application &self) override
@@ -129,6 +82,32 @@ public:
         stopOptionsProcessing();
     }
 
+    void camera_details(int camera_number)
+    {
+        auto camera_ref = cameras->select_camera(camera_number);
+        auto conn_info = camera_ref->get_connection_info();
+        logger().debug("Found camera %d  on port %s: %s", camera_number, conn_info->get_port(), conn_info->get_desc());
+
+        auto camera_info = camera_ref->get_camera_info();
+        std::cout << std::left; // << std::setfill('_');
+        std::cout << std::setw(LABEL_WIDTH) << "Product" << std::setw(0) << camera_info->get_product_name() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Body" << camera_info->get_body_ID_ex() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Owner Name" << camera_info->get_owner_name() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Maker" << camera_info->get_maker_name() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Date/Time" << camera_info->get_date_time() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Firmware" << camera_info->get_firmware_version() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Battery Level" << camera_info->get_battery_level() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Battery Quality" << camera_info->get_battery_quality() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Save to" << camera_info->get_save_to() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Current Storage" << camera_info->get_current_storage() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Current Folder" << camera_info->get_current_folder() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << (camera_info->get_lens_status() ? "Lens Attached" : "No Lens") << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Lens Name" << camera_info->get_lens_name() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Artist" << camera_info->get_artist() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Copyright" << camera_info->get_copyright() << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Available Shots" << camera_info->get_available_shots() << std::endl;
+    }
+
     int main(const std::vector<std::string> &) override
     {
         if (help_requested)
@@ -142,77 +121,37 @@ public:
             return EXIT_FAILURE;
         }
 
-        for (int cameraNumber = 0; cameraNumber < count; cameraNumber++)
+        if (!config().hasOption("show_files"))
         {
-            auto camera_ref = cameras->select_camera(cameraNumber);
-            auto conn_info = camera_ref->get_connection_info();
-            logger().debug("Found camera %d  on port %s: %s", cameraNumber, conn_info->get_port(), conn_info->get_desc());
-
-            auto camera_info = camera_ref->get_camera_info();
-            std::cout << std::left; // << std::setfill('_');
-            std::cout << std::setw(LABEL_WIDTH) << "Product" << std::setw(0) << camera_info->get_product_name() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Body" << camera_info->get_body_ID_ex() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Owner Name" << camera_info->get_owner_name() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Maker" << camera_info->get_maker_name() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Date/Time" << camera_info->get_date_time() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Firmware" << camera_info->get_firmware_version() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Battery Level" << camera_info->get_battery_level() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Battery Quality" << camera_info->get_battery_quality() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Save to" << camera_info->get_save_to() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Current Storage" << camera_info->get_current_storage() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Current Folder" << camera_info->get_current_folder() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << (camera_info->get_lens_status()?"Lens Attached": "No Lens") << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Lens Name" << camera_info->get_lens_name() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Artist" << camera_info->get_artist() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Copyright" << camera_info->get_copyright() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Available Shots" << camera_info->get_available_shots() << std::endl;
+            if (!config().hasOption("camera_number"))
+                for (int camera_number = 0; camera_number < count; camera_number++)
+                {
+                    camera_details(camera_number);
+                }
+            else
+            {
+                camera_details(config().getInt("camera_number"));
+            }
         }
+        else
+        {
+            int camera_number = config().getInt("camera_number", DEFAULT_CAMERA_NUMBER);
 
-        //    // Set Object event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering object event handler\n");
-        //        err = EdsSetObjectEventHandler(camera, kEdsObjectEvent_All, handleObjectEvent, NULL);
-        //    }
-        //
-        //    // Set Property event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering property event handler\n");
-        //        err = EdsSetPropertyEventHandler(camera, kEdsPropertyEvent_All, handlePropertyEvent, NULL);
-        //    }
-        //
-        //    // Set State event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering camera state event handler\n");
-        //        err = EdsSetCameraStateEventHandler(camera, kEdsStateEvent_All, handleStateEvent, NULL);
-        //    }
-        //
-        //    // Open session with camera
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Opening session\n");
-        //        err = EdsOpenSession(camera);
-        //    }
-        //
-        //    //
-        //    // do something
-        //    //
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        char name[1024];
-        //        EdsError e = getCameraInfo(camera, name);
-        //        if (e == EDS_ERR_OK)
-        //        {
-        //            printf("Found camera: %s\n", name);
-        //        }
-        //        else
-        //        {
-        //            printf("Error %d while getting camera name\n", e);
-        //        }
-        //    }
-        //
+            auto camera_ref = cameras->select_camera(camera_number);
+
+            auto vol = camera_ref->select_volume(0);
+            std::cout << std::left;
+            std::cout << "Selected volume number " << 0 << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Volume" << vol->get_label() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Storage Type" << vol->get_storage_type() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Access" << vol->get_access() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Max Capacity" << vol->get_max_capacity() / (1024.0 * 1024.0) << "MB" << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Free Space" << vol->get_free_space_bytes() / (1024.0 * 1024.0) << "MB" << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Directory Entries" << vol->get_directory_count() << std::endl;
+
+            std::cout << std::endl;
+            std::cerr << "TODO: Show file details for camera " << camera_number << std::endl;
+        }
 
         return EXIT_OK;
     }

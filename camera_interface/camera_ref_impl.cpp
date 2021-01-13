@@ -35,6 +35,7 @@ namespace implementation
         }
 
         conn_info = std::make_shared<impl_connection_info>(device_info.szPortName, device_info.szDeviceDescription);
+        session = std::make_unique<impl_camera_session>(ref);
     }
 
     impl_camera_ref::~impl_camera_ref()
@@ -58,7 +59,7 @@ namespace implementation
         EdsUInt32 count = 0;
         if (auto err = EdsGetChildCount(ref.get_ref(), &count); err != EDS_ERR_OK)
         {
-            Poco::Logger::get("camera_ref.volume").error("Failed to get child count (%lu)", err);
+            Poco::Logger::get("camera_ref.volume").error("Failed to get child count (%u)", err);
             throw eds_exception("Failed to get child count", err, __FUNCTION__);
         }
 

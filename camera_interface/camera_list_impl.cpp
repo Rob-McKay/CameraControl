@@ -66,7 +66,7 @@ namespace implementation
         EdsCameraRef camera(nullptr);
         if (auto err = EdsGetChildAtIndex(list, static_cast<EdsInt32>(camera_number), &camera); err != EDS_ERR_OK)
         {
-                        Poco::Logger::get("camera_list").error("Failed to select camera (%lu)", err);
+            Poco::Logger::get("camera_list").error("Failed to select camera (%lu)", err);
             throw eds_exception("Failed to select camera", err, __FUNCTION__);
         }
 
