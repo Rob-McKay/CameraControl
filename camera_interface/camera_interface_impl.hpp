@@ -9,6 +9,7 @@
 
 #include <memory>
 
+// Ensure that __MACOS__ is defined when compiling for macOS. (required for EDSDK.h)
 #if !defined __MACOS__
 #if defined __APPLE__ && defined __MACH__
 #define __MACOS__ 1
