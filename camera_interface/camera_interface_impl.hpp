@@ -189,7 +189,8 @@ namespace implementation
     {
         camera_ref_lock<EdsCameraRef> ref;
         std::shared_ptr<connection_info> conn_info;
-
+        std::unique_ptr<impl_camera_session> session;
+        
     public:
         impl_camera_ref(EdsCameraRef camera);
         virtual ~impl_camera_ref();

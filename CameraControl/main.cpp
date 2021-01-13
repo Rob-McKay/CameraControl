@@ -136,55 +136,22 @@ public:
         else
         {
             int camera_number = config().getInt("camera_number", DEFAULT_CAMERA_NUMBER);
+
+            auto camera_ref = cameras->select_camera(camera_number);
+
+            auto vol = camera_ref->select_volume(0);
+            std::cout << std::left;
+            std::cout << "Selected volume number " << 0 << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Volume" << vol->get_label() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Storage Type" << vol->get_storage_type() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Access" << vol->get_access() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Max Capacity" << vol->get_max_capacity() / (1024.0 * 1024.0) << "MB" << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Free Space" << vol->get_free_space_bytes() / (1024.0 * 1024.0) << "MB" << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Directory Entries" << vol->get_directory_count() << std::endl;
+
+            std::cout << std::endl;
             std::cerr << "TODO: Show file details for camera " << camera_number << std::endl;
         }
-        
-
-        //    // Set Object event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering object event handler\n");
-        //        err = EdsSetObjectEventHandler(camera, kEdsObjectEvent_All, handleObjectEvent, NULL);
-        //    }
-        //
-        //    // Set Property event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering property event handler\n");
-        //        err = EdsSetPropertyEventHandler(camera, kEdsPropertyEvent_All, handlePropertyEvent, NULL);
-        //    }
-        //
-        //    // Set State event handler
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Registering camera state event handler\n");
-        //        err = EdsSetCameraStateEventHandler(camera, kEdsStateEvent_All, handleStateEvent, NULL);
-        //    }
-        //
-        //    // Open session with camera
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        printf("Opening session\n");
-        //        err = EdsOpenSession(camera);
-        //    }
-        //
-        //    //
-        //    // do something
-        //    //
-        //    if(err == EDS_ERR_OK)
-        //    {
-        //        char name[1024];
-        //        EdsError e = getCameraInfo(camera, name);
-        //        if (e == EDS_ERR_OK)
-        //        {
-        //            printf("Found camera: %s\n", name);
-        //        }
-        //        else
-        //        {
-        //            printf("Error %d while getting camera name\n", e);
-        //        }
-        //    }
-        //
 
         return EXIT_OK;
     }
