@@ -42,26 +42,76 @@ public:
     virtual std::string get_save_to() const = 0;
     virtual std::string get_current_storage() const = 0;
     virtual std::string get_current_folder() const = 0;
-    virtual std::string get_lens_status() const = 0;
+    virtual bool get_lens_status() const = 0;
+    virtual std::string get_lens_name() const = 0;
     virtual std::string get_artist() const = 0;
     virtual std::string get_copyright() const = 0;
+    virtual size_t get_available_shots() const = 0;
+};
+
+class directory_ref
+{
+public:
+    typedef std::size_t size_type;
+    typedef uint32_t format_t;
+
+    virtual size_type get_file_size() const = 0;
+    virtual format_t get_format() const = 0;
+    virtual std::string get_name() const = 0;
+    virtual bool is_a_folder() const = 0;
+    virtual uint32_t get_group_ID() const = 0;
+};
+
+class volume_ref
+{
+public:
+    typedef std::size_t size_type;
+    enum storage_type_t
+    {
+        none,
+        compact_flash,
+        sd_card,
+        HD,
+        CFast
+    };
+
+    enum access_type_t
+    {
+        read,
+        write,
+        read_write,
+        unknown
+    };
+
+    virtual uint64_t get_max_capacity() const = 0;
+    virtual uint64_t get_free_space_bytes() const = 0;
+    virtual std::string get_label() const = 0;
+    virtual storage_type_t get_storage_type() const = 0;
+    virtual access_type_t get_access() const = 0;
+
+    virtual size_type get_directory_count() const = 0;
+    virtual std::shared_ptr<directory_ref> select_directory(size_type directory_number) = 0;
 };
 
 class camera_ref
 {
 public:
+    typedef uint32_t size_type;
+
     virtual std::shared_ptr<const connection_info> get_connection_info() const = 0;
     virtual std::shared_ptr<camera_info> get_camera_info() = 0;
+    virtual size_type get_volume_count() const = 0;
+    virtual std::shared_ptr<volume_ref> select_volume(size_type volume_number) = 0;
 };
 
 class camera_connection
 {
 public:
-    typedef std::size_t size_type;
+    typedef int32_t size_type;
 
-    virtual int number_of_cameras() const = 0;
+    virtual size_type number_of_cameras() const = 0;
     virtual std::shared_ptr<camera_ref> select_camera(size_type camera_number) = 0;
-    virtual ~camera_connection() {};
+    virtual ~camera_connection(){};
 };
 
 std::unique_ptr<camera_connection> get_camera_connection();

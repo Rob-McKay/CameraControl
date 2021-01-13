@@ -161,9 +161,11 @@ public:
             std::cout << std::setw(LABEL_WIDTH) << "Save to" << camera_info->get_save_to() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Current Storage" << camera_info->get_current_storage() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Current Folder" << camera_info->get_current_folder() << std::endl;
-            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << camera_info->get_lens_status() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Lens Status" << (camera_info->get_lens_status()?"Lens Attached": "No Lens") << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Lens Name" << camera_info->get_lens_name() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Artist" << camera_info->get_artist() << std::endl;
             std::cout << std::setw(LABEL_WIDTH) << "Copyright" << camera_info->get_copyright() << std::endl;
+            std::cout << std::setw(LABEL_WIDTH) << "Available Shots" << camera_info->get_available_shots() << std::endl;
         }
 
         //    // Set Object event handler
