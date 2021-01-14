@@ -19,6 +19,8 @@
 #endif
 
 #include "EDSDK.h"
+#include "Poco/Logger.h"
+#include <iostream>
 
 /* The classes below are not exported */
 #pragma GCC visibility push(hidden)
@@ -100,6 +102,7 @@ public:
     volume_ref::size_type get_directory_count() const override;
     std::shared_ptr<directory_ref> get_directory_entry(
         volume_ref::size_type directory_entry_number) const override;
+    std::shared_ptr<directory_ref> find_directory(std::string image_folder) const override;
 };
 
 class impl_volume_ref : public volume_ref
@@ -112,6 +115,8 @@ class impl_volume_ref : public volume_ref
     storage_type_t storage_type;
     access_type_t access;
 
+    std::shared_ptr<directory_ref> find_directory(std::string dir);
+
 public:
     impl_volume_ref(EdsVolumeRef r);
     virtual ~impl_volume_ref();
@@ -123,6 +128,9 @@ public:
 
     size_type get_directory_count() const override { return count; }
     std::shared_ptr<directory_ref> select_directory(size_type directory_number) override;
+
+    std::vector<std::shared_ptr<directory_ref>> find_matching_files(
+        std::string image_folder, std::regex filename_expression) override;
 };
 
 class impl_camera_session
@@ -135,6 +143,8 @@ public:
     {
         if (ref.get_ref() != nullptr)
         {
+            Poco::Logger::get("camera_ref").debug("Establishing camera session");
+
             EdsOpenSession(ref.get_ref());
         }
     }
@@ -142,6 +152,8 @@ public:
     {
         if (ref.get_ref() != nullptr)
         {
+            Poco::Logger::get("camera_ref").debug("Terminating camera session");
+
             EdsCloseSession(ref.get_ref());
         }
     }

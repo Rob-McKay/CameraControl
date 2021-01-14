@@ -9,6 +9,7 @@
 #define camera_interface_
 
 #include <memory>
+#include <regex>
 #include <stdexcept>
 #include <string>
 
@@ -63,6 +64,8 @@ public:
     virtual size_type get_directory_count() const = 0;
     virtual std::shared_ptr<directory_ref> get_directory_entry(
         size_type directory_entry_number) const = 0;
+
+    virtual std::shared_ptr<directory_ref> find_directory(std::string image_folder) const = 0;
 };
 
 class volume_ref
@@ -96,6 +99,10 @@ public:
 
     virtual size_type get_directory_count() const = 0;
     virtual std::shared_ptr<directory_ref> select_directory(size_type directory_number) = 0;
+
+    virtual std::vector<std::shared_ptr<directory_ref>> find_matching_files(
+        std::string image_folder, std::regex filename_expression)
+        = 0;
 };
 
 class camera_ref

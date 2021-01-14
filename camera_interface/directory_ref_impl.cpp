@@ -97,4 +97,30 @@ std::shared_ptr<directory_ref> impl_directory_ref::get_directory_entry(
     return dir_impl;
 }
 
+std::shared_ptr<directory_ref> impl_directory_ref::find_directory(std::string image_folder) const
+{
+    if (!is_folder)
+        throw std::logic_error("Not a directory");
+
+    for (volume_ref::size_type directory_entry_number = 0; directory_entry_number < count;
+         directory_entry_number++)
+    {
+        EdsDirectoryItemRef dir(nullptr);
+        if (auto err = EdsGetChildAtIndex(
+                ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir);
+            err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("directory_ref").error("Failed to get directory entry (0x%lX)", err);
+            throw eds_exception("Failed to get directory entry", err, __FUNCTION__);
+        }
+
+        std::shared_ptr<directory_ref> dir_impl = std::make_shared<impl_directory_ref>(dir);
+
+        if ((dir_impl->is_a_folder()) && (dir_impl->get_name().compare(image_folder) == 0))
+            return dir_impl;
+    }
+
+    return nullptr;
+}
+
 } // namespace implementation

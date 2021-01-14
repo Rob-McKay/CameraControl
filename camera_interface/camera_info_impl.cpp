@@ -145,7 +145,7 @@ namespace implementation
 
     impl_camera_info::impl_camera_info(camera_ref_lock<EdsCameraRef> ref)
     {
-        impl_camera_session session(ref);
+        //impl_camera_session session(ref);
 
         product_name = get_camera_property_string(ref, kEdsPropID_ProductName);
         body_ID_ex = get_camera_property_string(ref, kEdsPropID_BodyIDEx);

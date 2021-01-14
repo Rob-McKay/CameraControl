@@ -112,4 +112,42 @@ std::shared_ptr<directory_ref> impl_volume_ref::select_directory(size_type direc
 
     return dir_impl;
 }
+
+std::shared_ptr<directory_ref> impl_volume_ref::find_directory(std::string dir_name)
+{
+    for (size_type i = 0; i < count; i++)
+    {
+        auto dir = select_directory(i);
+        if (dir->is_a_folder() && (dir->get_name().compare(dir_name) == 0))
+            return dir;
+    }
+
+    return nullptr;
+}
+
+std::vector<std::shared_ptr<directory_ref>> impl_volume_ref::find_matching_files(
+    std::string image_folder, std::regex filename_expression)
+{
+    std::vector<std::shared_ptr<directory_ref>> list;
+    auto dcim_dir = find_directory("DCIM");
+
+    if (dcim_dir)
+    {
+        const auto image_dir = dcim_dir->find_directory(image_folder);
+        if (image_dir)
+        {
+            const auto count = image_dir->get_directory_count();
+            for (directory_ref::size_type i = 0; i < count; i++)
+            {
+                auto f = image_dir->get_directory_entry(i);
+
+                if (std::regex_match(f->get_name(), filename_expression))
+                    list.emplace_back(f);
+            }
+        }
+    }
+
+    return list;
+}
+
 } // namespace implementation
