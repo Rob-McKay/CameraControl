@@ -8,9 +8,9 @@
 #ifndef camera_interface_
 #define camera_interface_
 
-#include <string>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
@@ -60,6 +60,9 @@ public:
     virtual std::string get_name() const = 0;
     virtual bool is_a_folder() const = 0;
     virtual uint32_t get_group_ID() const = 0;
+    virtual size_type get_directory_count() const = 0;
+    virtual std::shared_ptr<directory_ref> get_directory_entry(
+        size_type directory_entry_number) const = 0;
 };
 
 class volume_ref
@@ -83,8 +86,10 @@ public:
         unknown
     };
 
+    /// Get the capacity of the volume (in KB)
     virtual uint64_t get_max_capacity() const = 0;
-    virtual uint64_t get_free_space_bytes() const = 0;
+    /// Get the free space on the volume (in KB)
+    virtual uint64_t get_free_space() const = 0;
     virtual std::string get_label() const = 0;
     virtual storage_type_t get_storage_type() const = 0;
     virtual access_type_t get_access() const = 0;
@@ -111,7 +116,7 @@ public:
 
     virtual size_type number_of_cameras() const = 0;
     virtual std::shared_ptr<camera_ref> select_camera(size_type camera_number) = 0;
-    virtual ~camera_connection(){};
+    virtual ~camera_connection() {};
 };
 
 std::unique_ptr<camera_connection> get_camera_connection();
