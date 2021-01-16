@@ -46,15 +46,14 @@ public:
 
         const int count = cameras->number_of_cameras();
 
-        options.addOption(Option("camera-number", "c", "Choose camera (0..n-1)")
+        options.addOption(Option("camera-number", "c", "Choose camera (0..n-1). Defaults to camera 0")
                               .required(false)
                               .argument("camera")
                               .validator(new IntValidator(0, count))
                               .binding("camera_number"));
 
         options.addOption(Option("files", "f",
-            "Display file information for the selected camera, or camera 0 if "
-            "no other camera is selected")
+            "Display file information for the selected camera.")
                               .required(false)
                               .binding("show_files"));
     }
