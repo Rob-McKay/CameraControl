@@ -20,7 +20,7 @@
 static std::string format_error(std::string message, int err, std::string method)
 {
     char buffer[42];
-    sprintf(buffer, " (Error %d [0x%x]", err, err);
+    sprintf(buffer, " (Error %d [0x%X]", err, err);
     return message + buffer + ((!method.empty()) ? (" in method " + method):"") + ")";
 }
 

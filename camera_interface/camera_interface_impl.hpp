@@ -13,12 +13,14 @@
 #if !defined __MACOS__
 #if defined __APPLE__ && defined __MACH__
 #define __MACOS__ 1
-#else
-#error "Only for MacOS"
 #endif
 #endif
 
 #include "EDSDK.h"
+#include "Poco/Format.h"
+#include "Poco/LocalDateTime.h"
+#include "Poco/Logger.h"
+#include "int_to_hex.hpp"
 
 /* The classes below are not exported */
 #pragma GCC visibility push(hidden)
@@ -78,6 +80,15 @@ public:
     std::string get_desc() const override;
 };
 
+class thumbnail
+{
+    Poco::LocalDateTime date_time;
+
+public:
+    thumbnail(EdsDirectoryItemRef);
+    Poco::LocalDateTime get_date_stamp() { return date_time; }
+};
+
 class impl_directory_ref : public directory_ref
 {
     camera_ref_lock<EdsDirectoryItemRef> ref;
@@ -96,10 +107,14 @@ public:
     format_t get_format() const override { return format; }
     std::string get_name() const override { return name; }
     bool is_a_folder() const override { return is_folder; };
+    std::string get_date_time() const override;
     uint32_t get_group_ID() const override { return group_id; }
+    void download_to(std::string destination) const override;
+
     volume_ref::size_type get_directory_count() const override;
     std::shared_ptr<directory_ref> get_directory_entry(
         volume_ref::size_type directory_entry_number) const override;
+    std::shared_ptr<directory_ref> find_directory(std::string image_folder) const override;
 };
 
 class impl_volume_ref : public volume_ref
@@ -112,6 +127,8 @@ class impl_volume_ref : public volume_ref
     storage_type_t storage_type;
     access_type_t access;
 
+    std::shared_ptr<directory_ref> find_directory(std::string dir);
+
 public:
     impl_volume_ref(EdsVolumeRef r);
     virtual ~impl_volume_ref();
@@ -123,6 +140,9 @@ public:
 
     size_type get_directory_count() const override { return count; }
     std::shared_ptr<directory_ref> select_directory(size_type directory_number) override;
+
+    std::vector<std::shared_ptr<directory_ref>> find_matching_files(
+        std::string image_folder, std::regex filename_expression) override;
 };
 
 class impl_camera_session
@@ -135,6 +155,8 @@ public:
     {
         if (ref.get_ref() != nullptr)
         {
+            Poco::Logger::get("camera_ref").debug("Establishing camera session");
+
             EdsOpenSession(ref.get_ref());
         }
     }
@@ -142,6 +164,8 @@ public:
     {
         if (ref.get_ref() != nullptr)
         {
+            Poco::Logger::get("camera_ref").debug("Terminating camera session");
+
             EdsCloseSession(ref.get_ref());
         }
     }
@@ -202,6 +226,8 @@ public:
     std::shared_ptr<camera_info> get_camera_info() override;
     size_type get_volume_count() const override;
     std::shared_ptr<volume_ref> select_volume(size_type volume_number) override;
+
+    void set_ui_status(bool enabled) override;
 };
 
 class impl_camera_list
@@ -237,3 +263,10 @@ public:
 } // namespace implementation
 
 #pragma GCC visibility pop
+
+#define THROW_ERRORS(stmt, logger_class, message)                                                  \
+    if (auto err = stmt; err != EDS_ERR_OK)                                                        \
+    {                                                                                              \
+        Poco::Logger::get(logger_class).error(std::string(message) + " (0x%s)", int_to_hex(err));  \
+        throw eds_exception(message, err, __FUNCTION__);                                           \
+    }

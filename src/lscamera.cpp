@@ -22,6 +22,7 @@ using namespace Poco::Util;
 constexpr int LABEL_WIDTH = 20;
 constexpr int NAME_WIDTH = 12;
 constexpr int SIZE_WIDTH = 8;
+constexpr int DATE_WIDTH = 16;
 constexpr int FORMAT_WIDTH = 10;
 constexpr int ID_WIDTH = 16;
 
@@ -45,15 +46,14 @@ public:
 
         const int count = cameras->number_of_cameras();
 
-        options.addOption(Option("camera-number", "c", "Choose camera (0..n-1)")
+        options.addOption(Option("camera-number", "c", "Choose camera (0..n-1). Defaults to camera 0")
                               .required(false)
                               .argument("camera")
                               .validator(new IntValidator(0, count))
                               .binding("camera_number"));
 
         options.addOption(Option("files", "f",
-            "Display file information for the selected camera, or camera 0 if "
-            "no other camera is selected")
+            "Display file information for the selected camera.")
                               .required(false)
                               .binding("show_files"));
     }
@@ -169,8 +169,9 @@ public:
         {
             std::cout << indent << std::setw(NAME_WIDTH) << dir_item->get_name()
                       << std::setw(SIZE_WIDTH) << std::right << std::setprecision(2) << std::fixed
-                      << dir_item->get_file_size() / (1024.0 * 1024.0) << std::setw(3) << "MB" << std::showbase
-                      << std::setw(FORMAT_WIDTH) << std::hex 
+                      << dir_item->get_file_size() / (1024.0 * 1024.0) << std::setw(3) << "MB "
+                      << std::setw(DATE_WIDTH) << dir_item->get_date_time()
+                      << std::showbase << std::setw(FORMAT_WIDTH) << std::hex 
                       << dir_item->get_format() << std::noshowbase << std::setw(ID_WIDTH) << std::dec
                       << std::setfill(' ') << dir_item->get_group_ID() << std::endl;
         }

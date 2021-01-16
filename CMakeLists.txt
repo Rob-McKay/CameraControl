@@ -16,16 +16,30 @@ set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
 find_package(Poco REQUIRED)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
+message(STATUS "Checking compiler ID '${CMAKE_CXX_COMPILER_ID}'")
+
+
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "^(AppleClang|Clang)$" )
+message(STATUS "Adding extra checks to compile flags")
+add_compile_options(-Wall -Wextra -Wpedantic -Werror=return-type -pedantic-errors -Wfor-loop-analysis -Wheader-hygiene -Widiomatic-parentheses -Wimplicit-fallthrough -Wmicrosoft)
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "^(MSVC)$" )
+add_compile_options(-W4)
+else()
+message(WARNING "No additional compile options for '${CMAKE_CXX_COMPILER_ID}'")
+endif()
 
 add_subdirectory(camera_interface)
 
-add_executable(lscamera "CameraControl/main.cpp")
+add_executable(lscamera "src/lscamera.cpp")
 target_link_libraries(lscamera PUBLIC Poco::Poco camera_interface)
 target_include_directories(lscamera PUBLIC 
     "${PROJECT_BINARY_DIR}"
     ${Poco_INCLUDE_DIRS}
     )
 
-
-#target_link_libraries(lscamera PUBLIC Poco::Util)
+add_executable(cpimage "src/cpimage.cpp")
+target_link_libraries(cpimage PUBLIC Poco::Poco camera_interface)
+target_include_directories(cpimage PUBLIC 
+    "${PROJECT_BINARY_DIR}"
+    ${Poco_INCLUDE_DIRS}
+    )

@@ -9,17 +9,13 @@
 #define camera_interface_
 
 #include <memory>
-#include <stdexcept>
+#include <regex>
 #include <string>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
-class eds_exception : public std::runtime_error
-{
-public:
-    eds_exception(std::string message, int err, std::string method = "");
-};
+#include "eds_exception.hpp"
 
 class connection_info
 {
@@ -58,11 +54,16 @@ public:
     virtual size_type get_file_size() const = 0;
     virtual format_t get_format() const = 0;
     virtual std::string get_name() const = 0;
-    virtual bool is_a_folder() const = 0;
+    virtual std::string get_date_time() const = 0;
     virtual uint32_t get_group_ID() const = 0;
+    virtual void download_to(std::string destination) const = 0;
+
+    virtual bool is_a_folder() const = 0;
     virtual size_type get_directory_count() const = 0;
     virtual std::shared_ptr<directory_ref> get_directory_entry(
         size_type directory_entry_number) const = 0;
+
+    virtual std::shared_ptr<directory_ref> find_directory(std::string image_folder) const = 0;
 };
 
 class volume_ref
@@ -96,6 +97,10 @@ public:
 
     virtual size_type get_directory_count() const = 0;
     virtual std::shared_ptr<directory_ref> select_directory(size_type directory_number) = 0;
+
+    virtual std::vector<std::shared_ptr<directory_ref>> find_matching_files(
+        std::string image_folder, std::regex filename_expression)
+        = 0;
 };
 
 class camera_ref
@@ -107,6 +112,8 @@ public:
     virtual std::shared_ptr<camera_info> get_camera_info() = 0;
     virtual size_type get_volume_count() const = 0;
     virtual std::shared_ptr<volume_ref> select_volume(size_type volume_number) = 0;
+
+    virtual void set_ui_status(bool enabled) = 0;
 };
 
 class camera_connection
