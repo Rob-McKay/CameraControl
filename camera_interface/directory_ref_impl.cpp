@@ -43,11 +43,8 @@ impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
 {
     EdsDirectoryItemInfo item;
 
-    if (auto err = EdsGetDirectoryItemInfo(ref.get_ref(), &item); err != EDS_ERR_OK)
-    {
-        Poco::Logger::get("directory_item").error("Failed to get directory item info (%lu)", err);
-        throw eds_exception("Failed to get directory item info", err, __FUNCTION__);
-    }
+    THROW_ERRORS(EdsGetDirectoryItemInfo(ref.get_ref(), &item), "directory_item",
+        "Failed to get directory item info");
 
     file_size = item.size;
     format = item.format;
@@ -58,48 +55,15 @@ impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
     if (is_folder)
     {
         EdsUInt32 listCount = 0;
-        if (auto err = EdsGetChildCount(ref.get_ref(), &listCount); err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("directory_item")
-                .error("Failed to get directory folder item count (0x%s)", int_to_hex(err));
-            throw eds_exception("Failed to get directory folder item count", err, __FUNCTION__);
-        }
+        THROW_ERRORS(EdsGetChildCount(ref.get_ref(), &listCount), "directory_item",
+            "Failed to get directory folder item count");
 
         count = listCount;
     }
     else
     {
-        EdsStreamRef stream(nullptr);
-
-        if (auto err = EdsCreateMemoryStream(0, &stream); err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("directory_item")
-                .error("Failed to create memory stream (0x%s)", int_to_hex(err));
-            throw eds_exception("Failed to create memory stream", err, __FUNCTION__);
-        }
-
-        if (auto err = EdsDownloadThumbnail(ref.get_ref(), stream); err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("directory_item")
-                .error("Failed to download thumbnail (0x%s)", int_to_hex(err));
-            throw eds_exception("Failed to download thumbnail", err, __FUNCTION__);
-        }
-
-        EdsImageRef img_ref(nullptr);
-
-        if (auto err = EdsCreateImageRef(stream, &img_ref); err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("directory_item")
-                .error("Failed to create image ref (0x%x)", int_to_hex(err));
-            throw eds_exception("Failed to create image ref", err, __FUNCTION__);
-        }
-
-        if (is_property_available(img_ref, kEdsPropID_DateTime))
-        {
-            date_time = get_camera_property_datetime(img_ref, kEdsPropID_DateTime);
-        }
-        EdsRelease(img_ref);
-        EdsRelease(stream);
+        thumbnail t(ref.get_ref());
+        date_time = t.get_date_stamp();
     }
 }
 
@@ -127,14 +91,9 @@ std::shared_ptr<directory_ref> impl_directory_ref::get_directory_entry(
     }
 
     EdsDirectoryItemRef dir(nullptr);
-    if (auto err
-        = EdsGetChildAtIndex(ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir);
-        err != EDS_ERR_OK)
-    {
-        Poco::Logger::get("directory_ref")
-            .error("Failed to get directory entry (0x%s)", int_to_hex(err));
-        throw eds_exception("Failed to get directory entry", err, __FUNCTION__);
-    }
+    THROW_ERRORS(
+        EdsGetChildAtIndex(ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir),
+        "directory_ref", "Failed to get directory entry");
 
     std::shared_ptr<directory_ref> dir_impl = std::make_shared<impl_directory_ref>(dir);
 
@@ -150,14 +109,9 @@ std::shared_ptr<directory_ref> impl_directory_ref::find_directory(std::string im
          directory_entry_number++)
     {
         EdsDirectoryItemRef dir(nullptr);
-        if (auto err = EdsGetChildAtIndex(
-                ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir);
-            err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("directory_ref")
-                .error("Failed to get directory entry (0x%s)", int_to_hex(err));
-            throw eds_exception("Failed to get directory entry", err, __FUNCTION__);
-        }
+        THROW_ERRORS(
+            EdsGetChildAtIndex(ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir),
+            "directory_ref", "Failed to get directory entry");
 
         std::shared_ptr<directory_ref> dir_impl = std::make_shared<impl_directory_ref>(dir);
 

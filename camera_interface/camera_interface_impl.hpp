@@ -17,8 +17,10 @@
 #endif
 
 #include "EDSDK.h"
+#include "Poco/Format.h"
 #include "Poco/LocalDateTime.h"
 #include "Poco/Logger.h"
+#include "int_to_hex.hpp"
 
 /* The classes below are not exported */
 #pragma GCC visibility push(hidden)
@@ -76,6 +78,15 @@ public:
 
     std::string get_port() const override;
     std::string get_desc() const override;
+};
+
+class thumbnail
+{
+    Poco::LocalDateTime date_time;
+
+public:
+    thumbnail(EdsDirectoryItemRef);
+    Poco::LocalDateTime get_date_stamp() { return date_time; }
 };
 
 class impl_directory_ref : public directory_ref
@@ -253,3 +264,10 @@ public:
 } // namespace implementation
 
 #pragma GCC visibility pop
+
+#define THROW_ERRORS(stmt, logger_class, message)                                                  \
+    if (auto err = stmt; err != EDS_ERR_OK)                                                        \
+    {                                                                                              \
+        Poco::Logger::get(logger_class).error(std::string(message) + " (0x%s)", int_to_hex(err));  \
+        throw eds_exception(message, err, __FUNCTION__);                                           \
+    }

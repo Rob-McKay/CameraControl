@@ -22,7 +22,7 @@ add_compile_options(-arch x86_64)
 
 target_sources(camera_interface PRIVATE camera_info_impl camera_interface.cpp camera_list_impl.cpp 
     camera_ref_impl.cpp connection_info_impl.cpp directory_ref_impl.cpp volume_ref_impl.cpp 
-    eds_exception.cpp properties.cpp)
+    eds_exception.cpp properties.cpp thumbnail.cpp)
 
 target_link_libraries(camera_interface PUBLIC ${canon_edsdk})
 install(DIRECTORY "${canon_edsdk}" TYPE LIB)

@@ -13,10 +13,10 @@
 #endif
 #endif
 
-#include <cstdio>
-#include <iostream>
 #include "camera_interface.hpp"
 #include "camera_interface_impl.hpp"
+#include <cstdio>
+#include <iostream>
 
 #include "EDSDK.h"
 
@@ -29,32 +29,28 @@ std::unique_ptr<camera_connection> get_camera_connection()
 
 namespace implementation
 {
-    impl_camera_connection::impl_camera_connection()
-    {
-        // Initialize SDK
-        if (auto err = EdsInitializeSDK(); err != EDS_ERR_OK)
-        {
-            Poco::Logger::get("camera_connection").error("Failed to initialise the EDS SDK (%lu)", err);
-            throw eds_exception("Failed to initialise the EDS SDK", err, __FUNCTION__);
-        }
+impl_camera_connection::impl_camera_connection()
+{
+    // Initialize SDK
+    THROW_ERRORS(EdsInitializeSDK(), "camera_connection", "Failed to initialise the EDS SDK");
 
-        cameras = std::make_unique<impl_camera_list>();
-    }
+    cameras = std::make_unique<impl_camera_list>();
+}
 
-    impl_camera_connection::~impl_camera_connection()
-    {
-        // Tidyup SDK
-        EdsTerminateSDK();
-    }
+impl_camera_connection::~impl_camera_connection()
+{
+    // Tidyup SDK
+    EdsTerminateSDK();
+}
 
-    std::shared_ptr<camera_ref> impl_camera_connection::select_camera(size_type camera_number)
-    {
-        return cameras->at(camera_number);
-    }
+std::shared_ptr<camera_ref> impl_camera_connection::select_camera(size_type camera_number)
+{
+    return cameras->at(camera_number);
+}
 
-    camera_connection::size_type impl_camera_connection::number_of_cameras() const
-    {
-        return cameras->size();
-    }
+camera_connection::size_type impl_camera_connection::number_of_cameras() const
+{
+    return cameras->size();
+}
 
 } // namespace implementation

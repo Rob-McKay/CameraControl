@@ -21,6 +21,7 @@
 #include "EDSDK.h"
 
 #include "Poco/Logger.h"
+#include "Poco/Format.h"
 
 namespace implementation
 {
@@ -29,11 +30,8 @@ impl_camera_ref::impl_camera_ref(EdsCameraRef camera)
 {
     EdsDeviceInfo device_info;
 
-    if (auto err = EdsGetDeviceInfo(ref.get_ref(), &device_info); err != EDS_ERR_OK)
-    {
-        Poco::Logger::get("camera_ref").error("Failed to get device info (%lu)", err);
-        throw eds_exception("Failed to get device info", err, __FUNCTION__);
-    }
+    THROW_ERRORS(
+        EdsGetDeviceInfo(ref.get_ref(), &device_info), "camera_ref", "Failed to get device info");
 
     conn_info = std::make_shared<impl_connection_info>(
         device_info.szPortName, device_info.szDeviceDescription);
@@ -57,11 +55,7 @@ std::shared_ptr<camera_info> impl_camera_ref::get_camera_info()
 impl_camera_ref::size_type impl_camera_ref::get_volume_count() const
 {
     EdsUInt32 count = 0;
-    if (auto err = EdsGetChildCount(ref.get_ref(), &count); err != EDS_ERR_OK)
-    {
-        Poco::Logger::get("camera_ref.volume").error("Failed to get child count (%u)", err);
-        throw eds_exception("Failed to get child count", err, __FUNCTION__);
-    }
+    THROW_ERRORS(EdsGetChildCount(ref.get_ref(), &count),"camera_ref.volume","Failed to get child count");
 
     return count;
 }
@@ -75,12 +69,7 @@ std::shared_ptr<volume_ref> impl_camera_ref::select_volume(size_type volume_numb
 
     EdsVolumeRef vol_ref = nullptr;
 
-    if (auto err = EdsGetChildAtIndex(ref.get_ref(), volume_number, &vol_ref); err != EDS_ERR_OK)
-    {
-        Poco::Logger::get("camera_ref.volume")
-            .error("Failed to get child at index %lu (%lu)", volume_number, err);
-        throw eds_exception("Failed to get child count", err, __FUNCTION__);
-    }
+    THROW_ERRORS(EdsGetChildAtIndex(ref.get_ref(), volume_number, &vol_ref),"camera_ref.volume",Poco::format("Failed to get child at index %lu", volume_number));
 
     selected_volume = std::make_shared<impl_volume_ref>(vol_ref);
 
@@ -89,10 +78,11 @@ std::shared_ptr<volume_ref> impl_camera_ref::select_volume(size_type volume_numb
 
 void impl_camera_ref::set_ui_status(bool enabled)
 {
-    if (auto err = EdsSendStatusCommand(ref.get_ref(), enabled?kEdsCameraStatusCommand_UILock:kEdsCameraStatusCommand_UIUnLock, 0); err != EDS_ERR_OK)
+    if (auto err = EdsSendStatusCommand(ref.get_ref(),
+            enabled ? kEdsCameraStatusCommand_UILock : kEdsCameraStatusCommand_UIUnLock, 0);
+        err != EDS_ERR_OK)
     {
-        Poco::Logger::get("camera_ref")
-            .error("Failed to set ui status (%x)", err);
+        Poco::Logger::get("camera_ref").error("Failed to set ui status (%x)", err);
         throw eds_exception("Failed to set ui status", err, __FUNCTION__);
     }
 }
