@@ -15,19 +15,28 @@
 
 #include "camera_interface.hpp"
 #include "camera_interface_impl.hpp"
+#include "int_to_hex.hpp"
+#include "properties.hpp"
 #include <cstdio>
 #include <iostream>
+#include <string>
 
 #include "EDSDK.h"
 
+#include "Poco/DateTimeFormat.h"
+#include "Poco/DateTimeFormatter.h"
+#include "Poco/LocalDateTime.h"
 #include "Poco/Logger.h"
 
 namespace implementation
 {
+using namespace std::string_literals;
+
 impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
     : ref(r)
     , file_size(0)
     , format(0)
+    , date_time(0)
     , is_folder(false)
     , group_id(0)
     , count(0)
@@ -52,11 +61,45 @@ impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
         if (auto err = EdsGetChildCount(ref.get_ref(), &listCount); err != EDS_ERR_OK)
         {
             Poco::Logger::get("directory_item")
-                .error("Failed to get directory folder item count (0x%lX)", err);
+                .error("Failed to get directory folder item count (0x%s)", int_to_hex(err));
             throw eds_exception("Failed to get directory folder item count", err, __FUNCTION__);
         }
 
         count = listCount;
+    }
+    else
+    {
+        EdsStreamRef stream(nullptr);
+
+        if (auto err = EdsCreateMemoryStream(0, &stream); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("directory_item")
+                .error("Failed to create memory stream (0x%s)", int_to_hex(err));
+            throw eds_exception("Failed to create memory stream", err, __FUNCTION__);
+        }
+
+        if (auto err = EdsDownloadThumbnail(ref.get_ref(), stream); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("directory_item")
+                .error("Failed to download thumbnail (0x%s)", int_to_hex(err));
+            throw eds_exception("Failed to download thumbnail", err, __FUNCTION__);
+        }
+
+        EdsImageRef img_ref(nullptr);
+
+        if (auto err = EdsCreateImageRef(stream, &img_ref); err != EDS_ERR_OK)
+        {
+            Poco::Logger::get("directory_item")
+                .error("Failed to create image ref (0x%x)", int_to_hex(err));
+            throw eds_exception("Failed to create image ref", err, __FUNCTION__);
+        }
+
+        if (is_property_available(img_ref, kEdsPropID_DateTime))
+        {
+            date_time = get_camera_property_datetime(img_ref, kEdsPropID_DateTime);
+        }
+        EdsRelease(img_ref);
+        EdsRelease(stream);
     }
 }
 
@@ -79,7 +122,7 @@ std::shared_ptr<directory_ref> impl_directory_ref::get_directory_entry(
     if (directory_entry_number >= count)
     {
         Poco::Logger::get("directory_ref")
-            .error("Directory entry out of range (0x%lX)", directory_entry_number);
+            .error("Directory entry out of range (%s)", std::to_string(directory_entry_number));
         throw std::out_of_range("Directory entry out of range");
     }
 
@@ -88,7 +131,8 @@ std::shared_ptr<directory_ref> impl_directory_ref::get_directory_entry(
         = EdsGetChildAtIndex(ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir);
         err != EDS_ERR_OK)
     {
-        Poco::Logger::get("directory_ref").error("Failed to get directory entry (0x%lX)", err);
+        Poco::Logger::get("directory_ref")
+            .error("Failed to get directory entry (0x%s)", int_to_hex(err));
         throw eds_exception("Failed to get directory entry", err, __FUNCTION__);
     }
 
@@ -110,7 +154,8 @@ std::shared_ptr<directory_ref> impl_directory_ref::find_directory(std::string im
                 ref.get_ref(), static_cast<EdsInt32>(directory_entry_number), &dir);
             err != EDS_ERR_OK)
         {
-            Poco::Logger::get("directory_ref").error("Failed to get directory entry (0x%lX)", err);
+            Poco::Logger::get("directory_ref")
+                .error("Failed to get directory entry (0x%s)", int_to_hex(err));
             throw eds_exception("Failed to get directory entry", err, __FUNCTION__);
         }
 
@@ -121,6 +166,17 @@ std::shared_ptr<directory_ref> impl_directory_ref::find_directory(std::string im
     }
 
     return nullptr;
+}
+
+std::string impl_directory_ref::get_date_time() const
+{
+    return (date_time != 0) ? Poco::DateTimeFormatter::format(date_time, "%d-%b-%Y %H:%M:%S"s)
+                            : ""s;
+}
+
+void impl_directory_ref::download_to(std::string destination) const
+{
+    // TODO: implement
 }
 
 } // namespace implementation

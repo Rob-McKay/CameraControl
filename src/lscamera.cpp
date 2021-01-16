@@ -22,6 +22,7 @@ using namespace Poco::Util;
 constexpr int LABEL_WIDTH = 20;
 constexpr int NAME_WIDTH = 12;
 constexpr int SIZE_WIDTH = 8;
+constexpr int DATE_WIDTH = 16;
 constexpr int FORMAT_WIDTH = 10;
 constexpr int ID_WIDTH = 16;
 
@@ -169,8 +170,9 @@ public:
         {
             std::cout << indent << std::setw(NAME_WIDTH) << dir_item->get_name()
                       << std::setw(SIZE_WIDTH) << std::right << std::setprecision(2) << std::fixed
-                      << dir_item->get_file_size() / (1024.0 * 1024.0) << std::setw(3) << "MB" << std::showbase
-                      << std::setw(FORMAT_WIDTH) << std::hex 
+                      << dir_item->get_file_size() / (1024.0 * 1024.0) << std::setw(3) << "MB "
+                      << std::setw(DATE_WIDTH) << dir_item->get_date_time()
+                      << std::showbase << std::setw(FORMAT_WIDTH) << std::hex 
                       << dir_item->get_format() << std::noshowbase << std::setw(ID_WIDTH) << std::dec
                       << std::setfill(' ') << dir_item->get_group_ID() << std::endl;
         }

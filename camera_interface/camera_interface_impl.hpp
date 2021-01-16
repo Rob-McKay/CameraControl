@@ -13,14 +13,12 @@
 #if !defined __MACOS__
 #if defined __APPLE__ && defined __MACH__
 #define __MACOS__ 1
-#else
-#error "Only for MacOS"
 #endif
 #endif
 
 #include "EDSDK.h"
+#include "Poco/LocalDateTime.h"
 #include "Poco/Logger.h"
-#include <iostream>
 
 /* The classes below are not exported */
 #pragma GCC visibility push(hidden)
@@ -86,6 +84,7 @@ class impl_directory_ref : public directory_ref
     size_type file_size;
     format_t format;
     std::string name;
+    Poco::LocalDateTime date_time;
     bool is_folder;
     uint32_t group_id;
     volume_ref::size_type count;
@@ -98,7 +97,10 @@ public:
     format_t get_format() const override { return format; }
     std::string get_name() const override { return name; }
     bool is_a_folder() const override { return is_folder; };
+    std::string get_date_time() const override;
     uint32_t get_group_ID() const override { return group_id; }
+    void download_to(std::string destination) const override;
+
     volume_ref::size_type get_directory_count() const override;
     std::shared_ptr<directory_ref> get_directory_entry(
         volume_ref::size_type directory_entry_number) const override;
@@ -214,6 +216,8 @@ public:
     std::shared_ptr<camera_info> get_camera_info() override;
     size_type get_volume_count() const override;
     std::shared_ptr<volume_ref> select_volume(size_type volume_number) override;
+
+    void set_ui_status(bool enabled) override;
 };
 
 class impl_camera_list
