@@ -49,7 +49,7 @@ public:
 
         options.addOption(Option("volume", "v", "Choose volume (0..n-1) defaults to 0")
                               .required(false)
-                              .argument("camera")
+                              .argument("volume")
                               .validator(new IntValidator(0, count))
                               .binding("volume_number"));
 
@@ -74,14 +74,14 @@ public:
     {
         HelpFormatter help_formatter(options());
         help_formatter.setCommand(commandName());
-        help_formatter.setUsage("OPTIONS file [file...]");
+        help_formatter.setUsage("OPTIONS <file> [<file> ...]");
         help_formatter.setHeader("\n" + commandName()
             + " Version " STR(LSCAMERA_VERSION_MAJOR) "." STR(
                 LSCAMERA_VERSION_MINOR) "\n\nDownload files from a Canon camera connect to the "
                                         "computer (via USB)");
         help_formatter.setFooter(
-            "\n file can be a standard regular expression.\ne.g. 'IMG_732.*' will match every file "
-            "starting with 'IMG_732' but 'IMG_732.*\\.CR2' Will match every file starting with "
+            "\n<file> can be a standard file wildcard expression.\ne.g. 'IMG_732*' will match every file "
+            "starting with 'IMG_732' but 'IMG_732*.CR2' Will match every file starting with "
             "'IMG_732' and ending with '.CR2'");
         help_formatter.format(std::cout);
     }
@@ -119,6 +119,8 @@ public:
 
         auto vol = camera_ref->select_volume(volume_number);
 
+        int c = 0;
+
         for (const auto& file_pattern : args)
         {
             auto matching_files = vol->find_matching_files(
@@ -126,9 +128,12 @@ public:
             for (const auto& file : matching_files)
             {
                 std::cout << "Copying file " << file->get_name() << std::endl;
+                c++;
                 // TODO: Copy the actual files
             }
         }
+
+        std::cout << c << " file(s) copied\n";
 
         return EXIT_OK;
     }

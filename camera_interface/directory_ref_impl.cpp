@@ -36,7 +36,6 @@ impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
     : ref(r)
     , file_size(0)
     , format(0)
-    , date_time(0)
     , is_folder(false)
     , group_id(0)
     , count(0)
@@ -59,11 +58,6 @@ impl_directory_ref::impl_directory_ref(EdsDirectoryItemRef r)
             "Failed to get directory folder item count");
 
         count = listCount;
-    }
-    else
-    {
-        thumbnail t(ref.get_ref());
-        date_time = t.get_date_stamp();
     }
 }
 
@@ -124,6 +118,14 @@ std::shared_ptr<directory_ref> impl_directory_ref::find_directory(std::string im
 
 std::string impl_directory_ref::get_date_time() const
 {
+    Poco::LocalDateTime date_time(0);
+
+    if (!is_folder)
+    {
+        thumbnail t(ref.get_ref());
+        date_time = t.get_date_stamp();
+    }
+
     return (date_time != 0) ? Poco::DateTimeFormatter::format(date_time, "%d-%b-%Y %H:%M:%S"s)
                             : ""s;
 }

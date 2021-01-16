@@ -95,7 +95,6 @@ class impl_directory_ref : public directory_ref
     size_type file_size;
     format_t format;
     std::string name;
-    Poco::LocalDateTime date_time;
     bool is_folder;
     uint32_t group_id;
     volume_ref::size_type count;

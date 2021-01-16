@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/cpimage",
-            "args": ["file1.cr2"],
+            "args": ["IMG_732*.cr2"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
