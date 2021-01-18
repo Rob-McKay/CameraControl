@@ -14,10 +14,22 @@ This code uses the Canon EOS Digital SDK (EDSDK) version 13.13.0 as a git submod
 
 This project currently only builds for macOS Catalina (10.15) and macOS Big Sur (11.0) for Intel 64bit processors - forced when compiled on Apple Silicon. It does support Apple silicon but has to use Rosetta 2 because the Canon EDSDK currently only supports Intel 64bit applications.
 
+### Notes
+
+The EDSDK produces an error message (see below) when an application using it starts up. It does not (seem to) stop the applications from working correctly.
+
+```lang-none
+[Release build] CHHLLite_InitializeCHHLLiteEx 
+2021-01-18 15:27:40.876 cpimage[50710:6880017] get NSURLIsDirectoryKey Error : Error Domain=NSCocoaErrorDomain Code=260 "The file “ic_hevcdec.framework” couldn’t be opened because there is no such file." UserInfo={NSURL=Frameworks/ic_hevcdec.framework -- file:///Users/rob/development/camera/CameraControl/build-rel/, NSFilePath=/Users/rob/development/camera/CameraControl/build-rel/Frameworks/ic_hevcdec.framework, NSUnderlyingError=0x7fa6bec21e50 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
+```
+
+### TODO
+
+- [ ] Provide a means of converting raw images to other format(s).
+
 ## Windows builds
 
 This project is has not (yet) been setup to build for Windows.
-
 
 ## Usage
 
