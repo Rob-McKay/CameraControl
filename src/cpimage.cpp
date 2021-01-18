@@ -5,6 +5,11 @@
 //  Created by Rob McKay on 08/01/2021.
 //
 
+#define __STDC_WANT_LIB_EXT1__ 1
+#include <chrono>
+#include <ctime>
+#include <thread>
+
 #include "Poco/Util/Application.h"
 #include "Poco/Util/HelpFormatter.h"
 #include "Poco/Util/IntValidator.h"
@@ -14,6 +19,8 @@
 
 #include <iomanip>
 #include <iostream>
+
+#include <filesystem>
 
 using namespace Poco::Util;
 
@@ -59,12 +66,34 @@ public:
                               .argument("folder")
                               .validator(new IntValidator(0, count))
                               .binding("folder_name"));
+
+        options.addOption(
+            Option("no-date-folders", "nd", "Do not put downloaded file into date folders")
+                .required(false)
+                .binding("no_date_folders"));
     }
 
     void initialize(Application& self) override
     {
         loadConfiguration(); // load default configuration files
         Application::initialize(self);
+    }
+
+    std::string format_name(time_t dt, std::string name)
+    {
+        std::tm t;
+        memmove(&t, gmtime(&dt), sizeof(t));
+
+        char buf[100];
+        std::strftime(buf, sizeof(buf), "%Y_%m_%d", &t);
+        std::filesystem::path dir(buf);
+
+        if (!std::filesystem::exists(dir))
+        {
+            std::filesystem::create_directories(dir);
+        }
+
+        return dir /= name;
     }
 
 #define STR2(x) #x
@@ -80,7 +109,8 @@ public:
                 LSCAMERA_VERSION_MINOR) "\n\nDownload files from a Canon camera connect to the "
                                         "computer (via USB)");
         help_formatter.setFooter(
-            "\n<file> can be a standard file wildcard expression.\ne.g. 'IMG_732*' will match every file "
+            "\n<file> can be a standard file wildcard expression.\ne.g. 'IMG_732*' will match "
+            "every file "
             "starting with 'IMG_732' but 'IMG_732*.CR2' Will match every file starting with "
             "'IMG_732' and ending with '.CR2'");
         help_formatter.format(std::cout);
@@ -106,6 +136,8 @@ public:
             return EXIT_FAILURE;
         }
 
+        const bool no_date_folders = config().hasProperty("no_date_folders");
+
         int camera_number = config().getInt("camera_number", DEFAULT_CAMERA_NUMBER);
 
         auto camera_ref = cameras->select_camera(camera_number);
@@ -121,21 +153,46 @@ public:
 
         int c = 0;
 
-        for (const auto& file_pattern : args)
+        try
         {
-            auto matching_files = vol->find_matching_files(
-                folder_name, convert_file_wildcards_to_regex(file_pattern));
-            for (const auto& file : matching_files)
+            for (const auto& file_pattern : args)
             {
-                std::cout << "Copying file " << file->get_name() << std::endl;
-                c++;
-                // TODO: Copy the actual files
+                auto matching_files = vol->find_matching_files(
+                    folder_name, convert_file_wildcards_to_regex(file_pattern));
+                for (const auto& file : matching_files)
+                {
+                    const auto timestamp = file->get_timestamp();
+                    auto name = (no_date_folders) ? file->get_name()
+                                                  : format_name(timestamp, file->get_name());
+
+                    std::cout << "Copying file " << file->get_name() << " to " << name << std::endl;
+                    c++;
+                    try
+                    {
+                        file->download_to(name);
+                    }
+                    catch (const eds_exception& ex)
+                    {
+                        std::cerr << "Failed to copy file " << file->get_name() << " to " << name
+                                  << ". Error " << ex.what() << std::endl;
+                        std::filesystem::remove(name);
+                        throw;
+                    }
+                    auto ft = std::filesystem::file_time_type::clock::from_time_t(timestamp);
+                    std::filesystem::last_write_time(name, ft);
+                    using namespace std::chrono_literals;
+                    std::this_thread::sleep_for(100ms);
+                }
             }
+
+            std::cout << c << " file(s) copied\n";
+
+            return EXIT_OK;
         }
-
-        std::cout << c << " file(s) copied\n";
-
-        return EXIT_OK;
+        catch (const eds_exception& ex)
+        {
+            return EXIT_FAILURE;
+        }
     }
 };
 

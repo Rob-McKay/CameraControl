@@ -108,6 +108,7 @@ public:
     std::string get_name() const override { return name; }
     bool is_a_folder() const override { return is_folder; };
     std::string get_date_time() const override;
+    std::time_t get_timestamp() const override;
     uint32_t get_group_ID() const override { return group_id; }
     void download_to(std::string destination) const override;
 
