@@ -23,10 +23,6 @@ The EDSDK produces an error message (see below) when an application using it sta
 2021-01-18 15:27:40.876 cpimage[50710:6880017] get NSURLIsDirectoryKey Error : Error Domain=NSCocoaErrorDomain Code=260 "The file “ic_hevcdec.framework” couldn’t be opened because there is no such file." UserInfo={NSURL=Frameworks/ic_hevcdec.framework -- file:///Users/rob/development/camera/CameraControl/build-rel/, NSFilePath=/Users/rob/development/camera/CameraControl/build-rel/Frameworks/ic_hevcdec.framework, NSUnderlyingError=0x7fa6bec21e50 {Error Domain=NSPOSIXErrorDomain Code=2 "No such file or directory"}}
 ```
 
-### TODO
-
-- [ ] Provide a means of converting raw images to other format(s).
-
 ## Windows builds
 
 This project is has not (yet) been setup to build for Windows.
@@ -40,3 +36,9 @@ This code produces a command line tool `lscamera`.
 `lscamera --help` displays version and parameter information
 
 `lscamera -c0 -f` displays files for camera 0.
+
+## TODO
+
+- [ ] Provide a means of converting raw images to other format(s).
+- [ ] Port to windows.
+- [ ] Provide downloadable executables (if anyone want one let me know)
