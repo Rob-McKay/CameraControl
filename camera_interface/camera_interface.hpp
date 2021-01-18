@@ -55,6 +55,7 @@ public:
     virtual format_t get_format() const = 0;
     virtual std::string get_name() const = 0;
     virtual std::string get_date_time() const = 0;
+    virtual std::time_t get_timestamp() const = 0;
     virtual uint32_t get_group_ID() const = 0;
     virtual void download_to(std::string destination) const = 0;
 
