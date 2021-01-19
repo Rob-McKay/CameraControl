@@ -8,7 +8,11 @@ This tool was created so that I didn't have to keep booting an old version of ma
 
 Interestingly the latest version of the Canon EOS SDK (version 13.13) on the latest version of macOS (11.1) will talk to my EOS 50D without any special setup (apart from using Rosetta 2 - see below).
 
-This code uses the Canon EOS Digital SDK (EDSDK) version 13.13.0 as a git submodule. This git submodule is the EOS SDK from Canon (Europe) put into git.
+These tools are built around a C++ interface which uses the RAII pattern for communicating with the Canon EDSDK.
+
+The Canon EOS Digital SDK (EDSDK) version 13.13.0 is imported into the project as a git submodule. This git submodule is the EOS SDK from Canon (Europe) put into git.
+
+This project also uses Poco for general things such as command line parameter decoding and logging. This project uses `conan` for dependency management (apart from the Canon EDSDK) and `cmake` for building.
 
 ## MacOS builds
 
@@ -29,16 +33,27 @@ This project is has not (yet) been setup to build for Windows.
 
 ## Usage
 
-This code produces a command line tool `lscamera`.
+This code produces command line tools `lscamera` and `cpimage`.
+
+### lscamera
+
+lscamera either shows information about Canon EOS cameras connected to the computer, or lists the files stored on a Canon EOS camera along with their dates and sizes.
 
 `lscamera` without any parameters produces a list of all the (Canon) cameras connected to the computer and their information.
 
 `lscamera --help` displays version and parameter information
 
-`lscamera -c0 -f` displays files for camera 0.
+`lscamera -c0 -f` or `lscamera --camera=0 --files` displays files for camera 0.
+
+### cpimage
+
+`cpimage` downloads files from a Canon EOS camera.
+
+`cpimage "IMG_73*"` will download images starting with `IMG_73` and put them in a folder named using the date the picture was taken. eg if the picture was taken on 1st Feb 2019, the folder name will be `2019_02_01`.
 
 ## TODO
 
+- [ ] Unit testing, especially of the C++ interface to the Canon EDSDK.
 - [ ] Provide a means of converting raw images to other format(s).
 - [ ] Port to windows.
 - [ ] Provide downloadable executables (if anyone want one let me know)
