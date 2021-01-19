@@ -10,6 +10,7 @@ fi
 pushd build
 conan install .. --profile "$script_path/conan-profiles/macos-debug" --build=missing || exit $?
 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug .. || exit $?
-cmake --build .
+cmake --build . || exit $?
+ctest
 # make
 popd

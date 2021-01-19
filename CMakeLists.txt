@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.19.2)
-project(lscamera VERSION 1.0)
+project(camera-tools VERSION 1.0)
+enable_testing()
 
 configure_file(LSCameraConfig.h.in LSCameraConfig.h)
 
@@ -29,6 +30,7 @@ message(WARNING "No additional compile options for '${CMAKE_CXX_COMPILER_ID}'")
 endif()
 
 add_subdirectory(camera_interface)
+add_subdirectory(tests)
 
 add_executable(lscamera "src/lscamera.cpp")
 target_link_libraries(lscamera PUBLIC Poco::Poco camera_interface)
