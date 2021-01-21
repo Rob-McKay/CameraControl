@@ -132,8 +132,8 @@ public:
         std::cout << std::setw(LABEL_WIDTH) << "Volume" << std::setw(0) << vol->get_label()
                   << std::endl;
         std::cout << std::setw(LABEL_WIDTH) << "Storage Type" << std::setw(0)
-                  << vol->get_storage_type() << std::endl;
-        std::cout << std::setw(LABEL_WIDTH) << "Access" << std::setw(0) << vol->get_access()
+                  << static_cast<int>(vol->get_storage_type()) << std::endl;
+        std::cout << std::setw(LABEL_WIDTH) << "Access" << std::setw(0) << static_cast<int>(vol->get_access())
                   << std::endl;
         std::cout << std::setw(LABEL_WIDTH) << "Max Capacity" << std::setw(0)
                   << vol->get_max_capacity() / (1024.0 * 1024.0) << " GB" << std::endl;

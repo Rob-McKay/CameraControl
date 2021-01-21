@@ -71,7 +71,7 @@ class volume_ref
 {
 public:
     typedef std::size_t size_type;
-    enum storage_type_t
+    enum class storage_type_t
     {
         none,
         compact_flash,
@@ -80,7 +80,7 @@ public:
         CFast
     };
 
-    enum access_type_t
+    enum class access_type_t
     {
         read,
         write,

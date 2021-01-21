@@ -73,7 +73,8 @@
         "utility": "cpp",
         "vector": "cpp",
         "regex": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "thread": "cpp"
     },
     "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: WebKit, IndentWidth: 4, TabWidth: 8, UseTab: Never, BreakBeforeBraces: Allman, ColumnLimit: 100}"
 }

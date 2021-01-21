@@ -26,6 +26,7 @@ add_executable(library_tests init_tests.cpp)
 
 target_link_libraries(library_tests
     PUBLIC ${extra_libraries}
+    camera_interface
     ${CONAN_LIBS}
     GTest::GTest 
     Poco::Poco
@@ -33,10 +34,16 @@ target_link_libraries(library_tests
 
 target_include_directories(library_tests
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/camera_interface
     ${CanonEDSDK}/Header
     ${CMAKE_MODULE_PATH}
     ${Poco_INCLUDE_DIRS}
     ${GTest_INCLUDE_DIRS}
+    )
+
+set_target_properties(library_tests
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     )
 
 add_test(NAME library_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND library_tests)
