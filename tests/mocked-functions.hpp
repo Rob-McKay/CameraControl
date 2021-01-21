@@ -22,10 +22,10 @@
 
 struct __EdsObject
 {
-    int count { 1 };
+    int count { 0 };
     void retain()
     {
-        ASSERT_GE(count, 1);
+        ASSERT_GE(count, 0);
         count++;
     }
 
@@ -41,6 +41,9 @@ struct __EdsObject
     {
         return EDS_ERR_UNIMPLEMENTED;
     }
+
+    virtual EdsError get_child_at_index(int, EdsBaseRef*) { return EDS_ERR_SELECTION_UNAVAILABLE; }
+    virtual EdsError get_child_count(EdsUInt32*) { return EDS_ERR_SELECTION_UNAVAILABLE; }
     virtual ~__EdsObject() {};
 };
 
@@ -57,9 +60,14 @@ public:
         info.reserved = 0;
     }
     virtual ~EdsCamera() { }
-    EdsDeviceInfo& get_device_info() { return info; }
+    EdsDeviceInfo& get_device_info()
+    {
+        EXPECT_GE(count, 1);
+        return info;
+    }
     EdsUInt32 get_property_size(EdsPropertyID id) override
     {
+        EXPECT_GE(count, 1);
         switch (id)
         {
         case kEdsPropID_ProductName:
@@ -100,6 +108,8 @@ public:
 
     EdsDataType get_property_type(EdsPropertyID id) override
     {
+        EXPECT_GE(count, 1);
+
         switch (id)
         {
         case kEdsPropID_ProductName:
@@ -142,6 +152,8 @@ public:
     EdsError get_property_data(EdsPropertyID id, EdsInt32 /*inParam*/, EdsUInt32 inPropertySize,
         EdsVoid* outPropertyData) override
     {
+        EXPECT_GE(count, 1);
+
         switch (id)
         {
         case kEdsPropID_ProductName:
@@ -210,8 +222,26 @@ public:
         for (int c = 0; c < num_cameras; c++)
             cameras.emplace_back("Port " + std::to_string(c), "Test Camera " + std::to_string(c));
     }
-    int size() { return cameras.size(); }
-    EdsCameraRef at(int offset) { return &cameras.at(offset); }
+    int size()
+    {
+        EXPECT_GE(count, 1);
+        return cameras.size();
+    }
+    EdsError get_child_at_index(int offset, EdsBaseRef* out) override
+    {
+        EXPECT_GE(count, 0);
+        if (offset >= static_cast<int>(cameras.size()))
+            return EDS_ERR_SELECTION_UNAVAILABLE; // TODO: Check proper return code
+
+        *out = &cameras.at(offset);
+        (*out)->retain();
+        return EDS_ERR_OK;
+    }
+    EdsError get_child_count(EdsUInt32* outCount) override
+    {
+        *outCount = cameras.size();
+        return EDS_ERR_OK;
+    }
 
     virtual ~EdsCameraList() { }
     EdsUInt32 get_property_size(EdsPropertyID) override
@@ -226,12 +256,14 @@ public:
 };
 
 std::shared_ptr<EdsCameraList> camera_list;
+EdsCamera* current_camera = nullptr;
 int initialised_count = 0;
 int finalised_count = 0;
 int max_num_cameras = 1;
 
 void reset_environment(int max_cameras)
 {
+    current_camera = nullptr;
     camera_list = nullptr;
     max_num_cameras = max_cameras;
     initialised_count = 0;
@@ -239,208 +271,46 @@ void reset_environment(int max_cameras)
 }
 
 #pragma clang diagnostic ignored "-Wunused-parameter"
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsInitializeSDK
-//
-//  Description:
-//      Initializes the libraries.
-//      When using the EDSDK libraries, you must call this API once
-//          before using EDSDK APIs.
-//
-//  Parameters:
-//       In:    None
-//      Out:    None
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
+
 EdsError EDSAPI EdsInitializeSDK()
 {
     initialised_count++;
     return EDS_ERR_OK;
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsTerminateSDK
-//
-//  Description:
-//      Terminates use of the libraries.
-//      This function muse be called when ending the SDK.
-//      Calling this function releases all resources allocated by the libraries.
-//
-//  Parameters:
-//       In:    None
-//      Out:    None
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsTerminateSDK()
 {
     finalised_count++;
     return EDS_ERR_OK;
 }
 
-/******************************************************************************
-*******************************************************************************
-//
-//  Reference-counter operating functions
-//
-*******************************************************************************
-******************************************************************************/
-
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsRetain
-//
-//  Description:
-//      Increments the reference counter of existing objects.
-//
-//  Parameters:
-//       In:    inRef - The reference for the item.
-//      Out:    None
-//
-//  Returns:    Returns a reference counter if successful. For errors, returns 0xFFFFFFFF.
-//              The return value is 4 bytes, and the maximum value of the reference counter is 65535
------------------------------------------------------------------------------*/
 EdsUInt32 EDSAPI EdsRetain(EdsBaseRef inRef)
 {
     inRef->retain();
     return inRef->count;
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsRelease
-//
-//  Description:
-//      Decrements the reference counter to an object.
-//      When the reference counter reaches 0, the object is released.
-//
-//  Parameters:
-//       In:    inRef - The reference of the item.
-//      Out:    None
-//  Returns:    Returns a reference counter if successful. For errors, returns 0xFFFFFFFF.
------------------------------------------------------------------------------*/
 EdsUInt32 EDSAPI EdsRelease(EdsBaseRef inRef)
 {
     inRef->release();
     return inRef->count;
 }
 
-/******************************************************************************
-*******************************************************************************
-//
-//  Item-tree operating functions
-//
-*******************************************************************************
-******************************************************************************/
-
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetChildCount
-//
-//  Description:
-//      Gets the number of child objects of the designated object.
-//      Example: Number of files in a directory
-//
-//  Parameters:
-//       In:    inRef - The reference of the list.
-//      Out:    outCount - Number of elements in this list.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetChildCount(EdsBaseRef inRef, EdsUInt32* outCount)
 {
-    if (inRef == camera_list.get())
-    {
-        EXPECT_NE(camera_list, nullptr);
-        if (camera_list == nullptr)
-            return EDS_ERR_PROTECTION_VIOLATION;
-
-        *outCount = camera_list->size();
-        return EDS_ERR_OK;
-    }
-    return EDS_ERR_UNIMPLEMENTED;
+    return inRef->get_child_count(outCount);
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetChildAtIndex
-//
-//  Description:
-//       Gets an indexed child object of the designated object.
-//
-//  Parameters:
-//       In:    inRef - The reference of the item.
-//              inIndex -  The index that is passed in, is zero based.
-//      Out:    outRef - The pointer which receives reference of the
-//                           specified index .
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetChildAtIndex(EdsBaseRef inRef, EdsInt32 inIndex, EdsBaseRef* outRef)
 {
-    if (inRef == camera_list.get())
-    {
-        EXPECT_NE(camera_list, nullptr);
-        if (camera_list == nullptr)
-            return EDS_ERR_PROTECTION_VIOLATION;
-
-        *outRef = camera_list->at(inIndex);
-        return EDS_ERR_OK;
-    }
-
-    return EDS_ERR_UNIMPLEMENTED;
+    return inRef->get_child_at_index(inIndex, outRef);
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetParent
-//
-//  Description:
-//      Gets the parent object of the designated object.
-//
-//  Parameters:
-//       In:    inRef        - The reference of the item.
-//      Out:    outParentRef - The pointer which receives reference.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetParent(EdsBaseRef inRef, EdsBaseRef* outParentRef)
 {
     return EDS_ERR_UNIMPLEMENTED;
 }
 
-/******************************************************************************
-*******************************************************************************
-//
-//  Property operating functions
-//
-*******************************************************************************
-******************************************************************************/
-
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetPropertySize
-//
-//  Description:
-//      Gets the byte size and data type of a designated property
-//          from a camera object or image object.
-//
-//  Parameters:
-//       In:    inRef - The reference of the item.
-//              inPropertyID - The ProprtyID
-//              inParam - Additional information of property.
-//                   We use this parameter in order to specify an index
-//                   in case there are two or more values over the same ID.
-//      Out:    outDataType - Pointer to the buffer that is to receive the property
-//                        type data.
-//              outSize - Pointer to the buffer that is to receive the property
-//                        size.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetPropertySize(EdsBaseRef inRef, EdsPropertyID inPropertyID, EdsInt32 inParam,
     EdsDataType* outDataType, EdsUInt32* outSize)
 {
@@ -452,130 +322,34 @@ EdsError EDSAPI EdsGetPropertySize(EdsBaseRef inRef, EdsPropertyID inPropertyID,
     return EDS_ERR_OK;
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetPropertyData
-//
-//  Description:
-//      Gets property information from the object designated in inRef.
-//
-//  Parameters:
-//       In:    inRef - The reference of the item.
-//              inPropertyID - The ProprtyID
-//              inParam - Additional information of property.
-//                   We use this parameter in order to specify an index
-//                   in case there are two or more values over the same ID.
-//              inPropertySize - The number of bytes of the prepared buffer
-//                  for receive property-value.
-//       Out:   outPropertyData - The buffer pointer to receive property-value.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetPropertyData(EdsBaseRef inRef, EdsPropertyID inPropertyID, EdsInt32 inParam,
     EdsUInt32 inPropertySize, EdsVoid* outPropertyData)
 {
     return inRef->get_property_data(inPropertyID, inParam, inPropertySize, outPropertyData);
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsSetPropertyData
-//
-//  Description:
-//      Sets property data for the object designated in inRef.
-//
-//  Parameters:
-//       In:    inRef - The reference of the item.
-//              inPropertyID - The ProprtyID
-//              inParam - Additional information of property.
-//              inPropertySize - The number of bytes of the prepared buffer
-//                  for set property-value.
-//              inPropertyData - The buffer pointer to set property-value.
-//      Out:    None
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsSetPropertyData(EdsBaseRef inRef, EdsPropertyID inPropertyID, EdsInt32 inParam,
     EdsUInt32 inPropertySize, const EdsVoid* inPropertyData)
 {
     return EDS_ERR_UNIMPLEMENTED;
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetPropertyDesc
-//
-//  Description:
-//      Gets a list of property data that can be set for the object
-//          designated in inRef, as well as maximum and minimum values.
-//      This API is intended for only some shooting-related properties.
-//
-//  Parameters:
-//       In:    inRef - The reference of the camera.
-//              inPropertyID - The Property ID.
-//       Out:   outPropertyDesc - Array of the value which can be set up.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetPropertyDesc(
     EdsBaseRef inRef, EdsPropertyID inPropertyID, EdsPropertyDesc* outPropertyDesc)
 {
     return EDS_ERR_UNIMPLEMENTED;
 }
 
-/******************************************************************************
-*******************************************************************************
-//
-//  Device-list and device operating functions
-//
-*******************************************************************************
-******************************************************************************/
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetCameraList
-//
-//  Description:
-//      Gets camera list objects.
-//
-//  Parameters:
-//       In:    None
-//      Out:    outCameraListRef - Pointer to the camera-list.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetCameraList(EdsCameraListRef* outCameraListRef)
 {
     if (!camera_list)
         camera_list = std::make_shared<EdsCameraList>(max_num_cameras);
+
+    camera_list->retain();
     *outCameraListRef = camera_list.get();
     return EDS_ERR_OK;
 }
 
-/******************************************************************************
-*******************************************************************************
-//
-//  Camera operating functions
-//
-*******************************************************************************
-******************************************************************************/
-
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsGetDeviceInfo
-//
-//  Description:
-//      Gets device information, such as the device name.
-//      Because device information of remote cameras is stored
-//          on the host computer, you can use this API
-//          before the camera object initiates communication
-//          (that is, before a session is opened).
-//
-//  Parameters:
-//       In:    inCameraRef - The reference of the camera.
-//      Out:    outDeviceInfo - Information as device of camera.
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
 EdsError EDSAPI EdsGetDeviceInfo(EdsCameraRef inCameraRef, EdsDeviceInfo* outDeviceInfo)
 {
     EXPECT_NE(inCameraRef, nullptr);
@@ -585,36 +359,27 @@ EdsError EDSAPI EdsGetDeviceInfo(EdsCameraRef inCameraRef, EdsDeviceInfo* outDev
     return EDS_ERR_OK;
 }
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsOpenSession
-//
-//  Description:
-//      Establishes a logical connection with a remote camera.
-//      Use this API after getting the camera's EdsCamera object.
-//
-//  Parameters:
-//       In:    inCameraRef - The reference of the camera
-//      Out:    None
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
-EdsError EDSAPI EdsOpenSession(EdsCameraRef inCameraRef) { return EDS_ERR_UNIMPLEMENTED; }
+EdsError EDSAPI EdsOpenSession(EdsCameraRef inCameraRef)
+{
+    EXPECT_NE(inCameraRef, nullptr);
+    EXPECT_GE(inCameraRef->count, 1);
 
-/*-----------------------------------------------------------------------------
-//
-//  Function:   EdsCloseSession
-//
-//  Description:
-//       Closes a logical connection with a remote camera.
-//
-//  Parameters:
-//       In:    inCameraRef - The reference of the camera
-//      Out:    None
-//
-//  Returns:    Any of the sdk errors.
------------------------------------------------------------------------------*/
-EdsError EDSAPI EdsCloseSession(EdsCameraRef inCameraRef) { return EDS_ERR_UNIMPLEMENTED; }
+    EXPECT_EQ(nullptr, current_camera);
+    current_camera = reinterpret_cast<EdsCamera*>(inCameraRef);
+    current_camera->retain();
+    return EDS_ERR_OK;
+}
+
+EdsError EDSAPI EdsCloseSession(EdsCameraRef inCameraRef)
+{
+    EXPECT_NE(inCameraRef, nullptr);
+    EXPECT_GE(inCameraRef->count, 1);
+
+    EXPECT_EQ(current_camera, inCameraRef);
+    current_camera->release();
+    current_camera = nullptr;
+    return EDS_ERR_OK;
+}
 
 /*-----------------------------------------------------------------------------
 //

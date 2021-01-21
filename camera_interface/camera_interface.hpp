@@ -124,6 +124,7 @@ public:
 
     virtual size_type number_of_cameras() const = 0;
     virtual std::shared_ptr<camera_ref> select_camera(size_type camera_number) = 0;
+    virtual void deselect_camera(std::shared_ptr<camera_ref>& camera) = 0;
     virtual ~camera_connection() {};
 };
 

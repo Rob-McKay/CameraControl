@@ -242,6 +242,7 @@ public:
     ~impl_camera_list();
     size_type size() const noexcept;
     std::shared_ptr<camera_ref> at(size_type offset);
+    void deselect_camera(std::shared_ptr<camera_ref>& camera);
 
 protected:
     EdsCameraListRef list;
@@ -256,6 +257,7 @@ protected:
 public:
     int number_of_cameras() const override;
     std::shared_ptr<camera_ref> select_camera(size_type camera_number) override;
+    void deselect_camera(std::shared_ptr<camera_ref>& camera) override;
 
     impl_camera_connection();
     virtual ~impl_camera_connection();

@@ -99,6 +99,8 @@ TEST(get_camera_connection, second_then_first_camera_connection)
     ASSERT_NE(nullptr, conn);
 
     EXPECT_EQ("Port 1", conn->get_port());
+    cameras->deselect_camera(camera);
+    
 
     camera = cameras->select_camera(0);
     conn = camera->get_connection_info();
