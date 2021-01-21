@@ -5,11 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(lldb) debug ctest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/debug/library_tests",
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
             "name": "cpimage (lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/cpimage",
-            "args": ["IMG_732*.cr2"],
+            "program": "${workspaceFolder}/debug/cpimage",
+            "args": [
+                "IMG_732*.cr2"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -20,8 +32,10 @@
             "name": "cpimage -h (lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/cpimage",
-            "args": ["-h"],
+            "program": "${workspaceFolder}/debug/cpimage",
+            "args": [
+                "-h"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -32,8 +46,10 @@
             "name": "lscamera (lldb) Launch with -f",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/lscamera",
-            "args": ["-f"],
+            "program": "${workspaceFolder}/debug/lscamera",
+            "args": [
+                "-f"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

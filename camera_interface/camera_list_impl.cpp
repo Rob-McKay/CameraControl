@@ -71,4 +71,14 @@ std::shared_ptr<camera_ref> impl_camera_list::at(size_type camera_number)
 
 impl_camera_list::size_type impl_camera_list::size() const noexcept { return count; }
 
+void impl_camera_list::deselect_camera(std::shared_ptr<camera_ref>& camera)
+{
+    if (current_camera != camera)
+    {
+        throw eds_exception("Failed to deselect camera", 42, __FUNCTION__);
+    }
+
+    current_camera.reset();
+}
+
 } // namespace implementation

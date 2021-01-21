@@ -53,7 +53,7 @@ lscamera either shows information about Canon EOS cameras connected to the compu
 
 ## TODO
 
-- [ ] Unit testing, especially of the C++ interface to the Canon EDSDK.
+- [ ] Complete unit testing, especially of the C++ interface to the Canon EDSDK.
 - [ ] Provide a means of converting raw images to other format(s).
 - [ ] Port to windows.
-- [ ] Provide downloadable executables (if anyone want one let me know)
+- [ ] Provide downloadable executables (if anyone wants one, please let me know!)

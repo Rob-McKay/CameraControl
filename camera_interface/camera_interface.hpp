@@ -71,7 +71,7 @@ class volume_ref
 {
 public:
     typedef std::size_t size_type;
-    enum storage_type_t
+    enum class storage_type_t
     {
         none,
         compact_flash,
@@ -80,7 +80,7 @@ public:
         CFast
     };
 
-    enum access_type_t
+    enum class access_type_t
     {
         read,
         write,
@@ -124,6 +124,7 @@ public:
 
     virtual size_type number_of_cameras() const = 0;
     virtual std::shared_ptr<camera_ref> select_camera(size_type camera_number) = 0;
+    virtual void deselect_camera(std::shared_ptr<camera_ref>& camera) = 0;
     virtual ~camera_connection() {};
 };
 

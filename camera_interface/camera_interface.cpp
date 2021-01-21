@@ -17,6 +17,7 @@
 #include "camera_interface_impl.hpp"
 #include <cstdio>
 #include <iostream>
+#include <memory>
 
 #include "EDSDK.h"
 
@@ -52,5 +53,12 @@ camera_connection::size_type impl_camera_connection::number_of_cameras() const
 {
     return cameras->size();
 }
+
+void impl_camera_connection::deselect_camera(std::shared_ptr<camera_ref>& camera)
+{
+    cameras->deselect_camera(camera);
+    camera.reset();
+}
+
 
 } // namespace implementation

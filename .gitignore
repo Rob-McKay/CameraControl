@@ -4,3 +4,5 @@ build/*
 Frameworks/*
 build-rel/*
 2020_10_11/IMG_*
+debug/*
+release/*

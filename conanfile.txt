@@ -1,5 +1,6 @@
 [requires]
 poco/[~1.10]
+gtest/[~1.10]
 
 [generators]
 cmake_find_package
