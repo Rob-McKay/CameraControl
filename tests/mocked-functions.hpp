@@ -51,8 +51,8 @@ class EdsCamera : public __EdsObject
 public:
     EdsCamera(std::string port, std::string name)
     {
-        strncpy(info.szPortName, port.c_str(), port.length());
-        strncpy(info.szDeviceDescription, name.c_str(), name.length());
+        strncpy(info.szPortName, port.c_str(), sizeof(info.szPortName));
+        strncpy(info.szDeviceDescription, name.c_str(), sizeof(info.szDeviceDescription));
         info.deviceSubType = 1;
         info.reserved = 0;
     }
@@ -205,7 +205,11 @@ class EdsCameraList : public __EdsObject
     std::vector<EdsCamera> cameras;
 
 public:
-    EdsCameraList() { cameras.emplace_back("Port 0", "Test Camera"); }
+    EdsCameraList(int num_cameras)
+    {
+        for (int c = 0; c < num_cameras; c++)
+            cameras.emplace_back("Port " + std::to_string(c), "Test Camera " + std::to_string(c));
+    }
     int size() { return cameras.size(); }
     EdsCameraRef at(int offset) { return &cameras.at(offset); }
 
@@ -224,10 +228,12 @@ public:
 std::shared_ptr<EdsCameraList> camera_list;
 int initialised_count = 0;
 int finalised_count = 0;
+int max_num_cameras = 1;
 
-void reset_environment()
+void reset_environment(int max_cameras)
 {
     camera_list = nullptr;
+    max_num_cameras = max_cameras;
     initialised_count = 0;
     finalised_count = 0;
 }
@@ -540,7 +546,7 @@ EdsError EDSAPI EdsGetPropertyDesc(
 EdsError EDSAPI EdsGetCameraList(EdsCameraListRef* outCameraListRef)
 {
     if (!camera_list)
-        camera_list = std::make_shared<EdsCameraList>();
+        camera_list = std::make_shared<EdsCameraList>(max_num_cameras);
     *outCameraListRef = camera_list.get();
     return EDS_ERR_OK;
 }

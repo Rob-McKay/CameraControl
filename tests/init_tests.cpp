@@ -4,7 +4,7 @@
 
 TEST(get_camera_connection, init)
 {
-    reset_environment();
+    reset_environment(1);
     EXPECT_EQ(0, initialised_count);
     EXPECT_EQ(0, finalised_count);
 
@@ -19,9 +19,9 @@ TEST(get_camera_connection, init)
     EXPECT_EQ(1, finalised_count);
 }
 
-TEST(get_camera_connection, count)
+TEST(get_camera_connection, count_1)
 {
-    reset_environment();
+    reset_environment(1);
 
     auto cameras = get_camera_connection();
 
@@ -30,9 +30,35 @@ TEST(get_camera_connection, count)
     EXPECT_EQ(1, cameras->number_of_cameras());
 }
 
-TEST(get_camera_connection, only_camera)
+TEST(get_camera_connection, count_0)
 {
-    reset_environment();
+    reset_environment(0);
+
+    auto cameras = get_camera_connection();
+
+    ASSERT_NE(nullptr, cameras.get());
+
+    EXPECT_EQ(0, cameras->number_of_cameras());
+}
+
+TEST(get_camera_connection, only_camera_connection)
+{
+    reset_environment(1);
+
+    auto cameras = get_camera_connection();
+
+    ASSERT_NE(nullptr, cameras.get());
+
+    auto camera = cameras->select_camera(0);
+    auto conn = camera->get_connection_info();
+    ASSERT_NE(nullptr, conn);
+
+    EXPECT_EQ("Port 0", conn->get_port());
+}
+
+TEST(get_camera_connection, only_camera_info)
+{
+    reset_environment(1);
 
     auto cameras = get_camera_connection();
 
@@ -41,4 +67,6 @@ TEST(get_camera_connection, only_camera)
     auto camera = cameras->select_camera(0);
     auto info = camera->get_camera_info();
     ASSERT_NE(nullptr, info);
+
+    EXPECT_EQ("Canon EOS 50000D", info->get_product_name());
 }
