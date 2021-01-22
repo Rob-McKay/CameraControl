@@ -9,6 +9,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
 
 find_package(Poco REQUIRED)
 find_package(GTest REQUIRED)
+find_package(Microsoft.GSL REQUIRED)
 
 set(CanonEDSDK ${CMAKE_SOURCE_DIR}/CanonEDSDK/Machintosh/EDSDK)
 
@@ -39,6 +40,7 @@ target_include_directories(library_tests
     ${CMAKE_MODULE_PATH}
     ${Poco_INCLUDE_DIRS}
     ${GTest_INCLUDE_DIRS}
+    ${Microsoft.GSL_INCLUDE_DIRS}
     )
 
 set_target_properties(library_tests
