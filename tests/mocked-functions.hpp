@@ -16,9 +16,30 @@
 #include "EDSDK.h"
 #include "EDSDKErrors.h"
 #include "gtest/gtest.h"
+#include <cstddef>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
+
+#include "gsl/span"
+#include "gsl/span_ext"
+
+namespace
+{
+struct object_properties
+{
+    EdsDataType data_type;
+    EdsUInt32 size;
+    std::string char_data;
+    std::vector<std::byte> binary_data;
+};
+
+std::vector<std::byte> vectorise(gsl::span<const std::byte> sp)
+{
+    return std::vector<std::byte>(sp.begin(), sp.end());
+}
+}
 
 struct __EdsObject
 {
@@ -35,10 +56,46 @@ struct __EdsObject
         count--;
     }
 
-    virtual EdsUInt32 get_property_size(EdsPropertyID propertyID) = 0;
-    virtual EdsDataType get_property_type(EdsPropertyID propertyID) = 0;
-    virtual EdsError get_property_data(EdsPropertyID, EdsInt32, EdsUInt32, EdsVoid*)
+    virtual std::map<EdsPropertyID, object_properties>& get_object_properties() = 0;
+    virtual EdsUInt32 get_property_size(EdsPropertyID propertyID)
     {
+        auto& props = get_object_properties();
+        auto prop = props.find(propertyID);
+        if (prop != props.end())
+            return prop->second.size;
+        return 0;
+    }
+
+    virtual EdsDataType get_property_type(EdsPropertyID propertyID)
+    {
+        auto& props = get_object_properties();
+        auto prop = props.find(propertyID);
+        if (prop != props.end())
+            return prop->second.data_type;
+        return kEdsDataType_Unknown;
+    }
+
+    virtual EdsError get_property_data(EdsPropertyID propertyID, EdsInt32 /*inParam*/,
+        EdsUInt32 inPropertySize, EdsVoid* outPropertyData)
+    {
+        EXPECT_GE(count, 1);
+
+        auto& props = get_object_properties();
+        auto prop = props.find(propertyID);
+        if (prop != props.end())
+        {
+            if (prop->second.data_type == kEdsDataType_String)
+            {
+                strncpy(reinterpret_cast<char*>(outPropertyData), prop->second.char_data.c_str(),
+                    inPropertySize);
+            }
+            else
+            {
+                memcpy(outPropertyData, prop->second.binary_data.data(),
+                    std::min(prop->second.binary_data.size(), static_cast<size_t>(inPropertySize)));
+            }
+            return EDS_ERR_OK;
+        }
         return EDS_ERR_UNIMPLEMENTED;
     }
 
@@ -47,186 +104,118 @@ struct __EdsObject
     virtual ~__EdsObject() {};
 };
 
+struct entries
+{
+    EdsPropertyID key;
+    object_properties value;
+};
+
+struct camera_info_data
+{
+    std::string product_name;
+    std::string body_ID_ex;
+    std::string owner_name;
+    std::string maker_name;
+    struct tm date_time;
+    std::string firmware_version;
+    int32_t battery_level;
+    uint32_t save_to;
+    std::string current_storage;
+    std::string current_folder;
+    uint32_t lens_status;
+    std::string lens_name;
+    std::string artist;
+    std::string copyright;
+    size_t available_shots;
+};
+
 class EdsCamera : public __EdsObject
 {
     EdsDeviceInfo info;
+    std::map<EdsPropertyID, object_properties> properties;
 
 public:
-    EdsCamera(std::string port, std::string name)
+    EdsCamera(std::string port, std::string name, const camera_info_data& data)
     {
         strncpy(info.szPortName, port.c_str(), sizeof(info.szPortName));
         strncpy(info.szDeviceDescription, name.c_str(), sizeof(info.szDeviceDescription));
         info.deviceSubType = 1;
         info.reserved = 0;
+
+        EdsTime camera_time { static_cast<EdsUInt32>(data.date_time.tm_year + 1900), static_cast<EdsUInt32>(data.date_time.tm_mon + 1),
+            static_cast<EdsUInt32>(data.date_time.tm_mday), static_cast<EdsUInt32>(data.date_time.tm_hour), static_cast<EdsUInt32>(data.date_time.tm_min),
+            static_cast<EdsUInt32>(data.date_time.tm_sec), 0 };
+
+        for (auto p :
+            std::initializer_list<entries> {
+                { kEdsPropID_ProductName,
+                    { kEdsDataType_String, EDS_MAX_NAME, data.product_name, {} } },
+                { kEdsPropID_BodyIDEx, { kEdsDataType_String, EDS_MAX_NAME, data.body_ID_ex, {} } },
+                { kEdsPropID_OwnerName,
+                    { kEdsDataType_String, EDS_MAX_NAME, data.owner_name, {} } },
+                //{ kEdsPropID_MakerName, { kEdsDataType_String, EDS_MAX_NAME, "Canon", {} } },
+                { kEdsPropID_DateTime,
+                    { kEdsDataType_Time, sizeof(EdsTime), "",
+                        vectorise(gsl::as_bytes(gsl::make_span(&camera_time, 1))) } },
+                { kEdsPropID_FirmwareVersion,
+                    { kEdsDataType_String, EDS_MAX_NAME, "11.22.33", {} } },
+                { kEdsPropID_BatteryLevel,
+                    { kEdsDataType_Int32, sizeof(EdsInt32), "",
+                        vectorise(gsl::as_bytes(gsl::make_span(&data.battery_level, 1))) } },
+                { kEdsPropID_SaveTo,
+                    { kEdsDataType_UInt32, sizeof(EdsUInt32), "",
+                        vectorise(gsl::as_bytes(gsl::make_span(&data.save_to, 1))) } },
+                { kEdsPropID_CurrentStorage, { kEdsDataType_String, EDS_MAX_NAME, "CF", {} } },
+                { kEdsPropID_CurrentFolder, { kEdsDataType_String, EDS_MAX_NAME, "100CANON", {} } },
+                { kEdsPropID_AvailableShots,
+                    { kEdsDataType_UInt32, sizeof(EdsUInt32), "",
+                        vectorise(gsl::as_bytes(gsl::make_span(&data.available_shots, 1))) } },
+                { kEdsPropID_LensStatus,
+                    { kEdsDataType_UInt32, sizeof(EdsUInt32), "",
+                        vectorise(gsl::as_bytes(gsl::make_span(&data.lens_status, 1))) } },
+                { kEdsPropID_LensName,
+                    { kEdsDataType_String, EDS_MAX_NAME, "EF-S10-18mm f/4.5-5.6 IS STM", {} } },
+                { kEdsPropID_Artist,
+                    { kEdsDataType_String, EDS_MAX_NAME, "Photographer:Test User", {} } },
+                { kEdsPropID_Copyright,
+                    { kEdsDataType_String, EDS_MAX_NAME, "Copyright:Rob McKay", {} } } })
+        {
+            properties.emplace(p.key, p.value);
+        }
     }
+
     virtual ~EdsCamera() { }
     EdsDeviceInfo& get_device_info()
     {
         EXPECT_GE(count, 1);
         return info;
     }
-    EdsUInt32 get_property_size(EdsPropertyID id) override
+
+    std::map<EdsPropertyID, object_properties>& get_object_properties() override
     {
-        EXPECT_GE(count, 1);
-        switch (id)
-        {
-        case kEdsPropID_ProductName:
-            return EDS_MAX_NAME;
-        case kEdsPropID_BodyIDEx:
-            return EDS_MAX_NAME;
-        case kEdsPropID_OwnerName:
-            return EDS_MAX_NAME;
-        case kEdsPropID_MakerName:
-            return EDS_MAX_NAME;
-        case kEdsPropID_DateTime:
-            return sizeof(EdsTime);
-        case kEdsPropID_FirmwareVersion:
-            return EDS_MAX_NAME;
-        case kEdsPropID_BatteryLevel:
-            return sizeof(kEdsDataType_UInt32);
-        // case kEdsPropID_BatteryQuality:
-        //     return std::numeric_limits<EdsUInt32>::max();
-        case kEdsPropID_SaveTo:
-            return sizeof(kEdsDataType_UInt32);
-        case kEdsPropID_CurrentStorage:
-            return EDS_MAX_NAME;
-        case kEdsPropID_CurrentFolder:
-            return EDS_MAX_NAME;
-        case kEdsPropID_AvailableShots:
-            return sizeof(EdsUInt32);
-        case kEdsPropID_LensStatus:
-            return sizeof(kEdsDataType_UInt32);
-        case kEdsPropID_LensName:
-            return EDS_MAX_NAME;
-        case kEdsPropID_Artist:
-            return EDS_MAX_NAME;
-        case kEdsPropID_Copyright:
-            return EDS_MAX_NAME;
-        }
-        return std::numeric_limits<EdsUInt32>::max();
-    }
-
-    EdsDataType get_property_type(EdsPropertyID id) override
-    {
-        EXPECT_GE(count, 1);
-
-        switch (id)
-        {
-        case kEdsPropID_ProductName:
-            return kEdsDataType_String;
-        case kEdsPropID_BodyIDEx:
-            return kEdsDataType_String;
-        case kEdsPropID_OwnerName:
-            return kEdsDataType_String;
-        case kEdsPropID_MakerName:
-            return kEdsDataType_Unknown;
-            // return kEdsDataType_String;
-        case kEdsPropID_DateTime:
-            return kEdsDataType_Time;
-        case kEdsPropID_FirmwareVersion:
-            return kEdsDataType_String;
-        case kEdsPropID_BatteryLevel:
-            return kEdsDataType_Int32;
-        case kEdsPropID_BatteryQuality:
-            return kEdsDataType_Unknown;
-        case kEdsPropID_SaveTo:
-            return kEdsDataType_UInt32;
-        case kEdsPropID_CurrentStorage:
-            return kEdsDataType_String;
-        case kEdsPropID_CurrentFolder:
-            return kEdsDataType_String;
-        case kEdsPropID_AvailableShots:
-            return kEdsDataType_UInt32;
-        case kEdsPropID_LensStatus:
-            return kEdsDataType_UInt32;
-        case kEdsPropID_LensName:
-            return kEdsDataType_String;
-        case kEdsPropID_Artist:
-            return kEdsDataType_String;
-        case kEdsPropID_Copyright:
-            return kEdsDataType_String;
-        }
-        return kEdsDataType_Unknown;
-    }
-
-    EdsError get_property_data(EdsPropertyID id, EdsInt32 /*inParam*/, EdsUInt32 inPropertySize,
-        EdsVoid* outPropertyData) override
-    {
-        EXPECT_GE(count, 1);
-
-        switch (id)
-        {
-        case kEdsPropID_ProductName:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "Canon EOS 50000D");
-            return EDS_ERR_OK;
-        case kEdsPropID_BodyIDEx:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "10603");
-            return EDS_ERR_OK;
-        case kEdsPropID_OwnerName:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "Test Owner!");
-            return EDS_ERR_OK;
-        // case kEdsPropID_MakerName:
-        //     return kEdsDataType_String;
-        case kEdsPropID_DateTime:
-        {
-            if (inPropertySize != sizeof(EdsTime))
-                return EDS_ERR_PROPERTIES_MISMATCH;
-            EdsTime dt { 2021u, 1u, 1u, 23u, 59u, 59u, 999u };
-            memcpy(outPropertyData, &dt, sizeof(dt));
-            return EDS_ERR_OK;
-        }
-        case kEdsPropID_FirmwareVersion:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "11.22.33.44");
-            return EDS_ERR_OK;
-        case kEdsPropID_BatteryLevel:
-            *reinterpret_cast<EdsUInt32*>(outPropertyData) = 42;
-            return EDS_ERR_OK;
-        // case kEdsPropID_BatteryQuality:
-        //     return EDS_ERR_PROPERTIES_UNAVAILABLE;
-        case kEdsPropID_SaveTo:
-            *reinterpret_cast<EdsUInt32*>(outPropertyData) = 0;
-            return EDS_ERR_OK;
-        case kEdsPropID_CurrentStorage:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "CF");
-            return EDS_ERR_OK;
-        case kEdsPropID_CurrentFolder:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "100CANON");
-            return EDS_ERR_OK;
-        case kEdsPropID_AvailableShots:
-            *reinterpret_cast<EdsUInt32*>(outPropertyData) = 999u;
-            return EDS_ERR_OK;
-        case kEdsPropID_LensStatus:
-            *reinterpret_cast<EdsUInt32*>(outPropertyData) = 1u;
-            return EDS_ERR_OK;
-        case kEdsPropID_LensName:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "Canon 50mm");
-            return EDS_ERR_OK;
-        case kEdsPropID_Artist:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "Claude Monet");
-            return EDS_ERR_OK;
-        case kEdsPropID_Copyright:
-            strcpy(reinterpret_cast<char*>(outPropertyData), "Test Copyright 2021");
-            return EDS_ERR_OK;
-        }
-        return EDS_ERR_PROPERTIES_UNAVAILABLE;
+        return properties;
     }
 };
 
 class EdsCameraList : public __EdsObject
 {
     std::vector<EdsCamera> cameras;
+    std::map<EdsPropertyID, object_properties> properties;
 
 public:
-    EdsCameraList(int num_cameras)
+    EdsCameraList() { }
+
+    void add_camera(std::string port, std::string name, const camera_info_data& data) // TODO: Add other camera settings
     {
-        for (int c = 0; c < num_cameras; c++)
-            cameras.emplace_back("Port " + std::to_string(c), "Test Camera " + std::to_string(c));
+        cameras.emplace_back(port, name, data);
     }
+
     int size()
     {
         EXPECT_GE(count, 1);
         return cameras.size();
     }
+
     EdsError get_child_at_index(int offset, EdsBaseRef* out) override
     {
         EXPECT_GE(count, 0);
@@ -237,6 +226,7 @@ public:
         (*out)->retain();
         return EDS_ERR_OK;
     }
+
     EdsError get_child_count(EdsUInt32* outCount) override
     {
         *outCount = cameras.size();
@@ -244,6 +234,12 @@ public:
     }
 
     virtual ~EdsCameraList() { }
+
+    std::map<EdsPropertyID, object_properties>& get_object_properties() override
+    {
+        return properties;
+    }
+
     EdsUInt32 get_property_size(EdsPropertyID) override
     {
         throw std::runtime_error("Invalid object for get_property");
@@ -261,13 +257,20 @@ int initialised_count = 0;
 int finalised_count = 0;
 int max_num_cameras = 1;
 
-void reset_environment(int max_cameras)
+void reset_environment()
 {
     current_camera = nullptr;
     camera_list = nullptr;
-    max_num_cameras = max_cameras;
     initialised_count = 0;
     finalised_count = 0;
+}
+
+void add_camera(std::string port, std::string camera_name, const camera_info_data& data)
+{
+    if (!camera_list)
+        camera_list = std::make_shared<EdsCameraList>();
+
+    camera_list->add_camera(port, camera_name, data);
 }
 
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -343,7 +346,7 @@ EdsError EDSAPI EdsGetPropertyDesc(
 EdsError EDSAPI EdsGetCameraList(EdsCameraListRef* outCameraListRef)
 {
     if (!camera_list)
-        camera_list = std::make_shared<EdsCameraList>(max_num_cameras);
+        camera_list = std::make_shared<EdsCameraList>();
 
     camera_list->retain();
     *outCameraListRef = camera_list.get();
