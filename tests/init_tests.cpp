@@ -4,7 +4,9 @@
 
 TEST(get_camera_connection, init)
 {
-    reset_environment(1);
+    reset_environment();
+    add_camera("0", "Test");
+
     EXPECT_EQ(0, initialised_count);
     EXPECT_EQ(0, finalised_count);
 
@@ -21,7 +23,8 @@ TEST(get_camera_connection, init)
 
 TEST(get_camera_connection, count_1)
 {
-    reset_environment(1);
+    reset_environment();
+    add_camera("0", "Test");
 
     auto cameras = get_camera_connection();
 
@@ -32,7 +35,7 @@ TEST(get_camera_connection, count_1)
 
 TEST(get_camera_connection, count_0)
 {
-    reset_environment(0);
+    reset_environment();
 
     auto cameras = get_camera_connection();
 
@@ -43,7 +46,8 @@ TEST(get_camera_connection, count_0)
 
 TEST(get_camera_connection, only_camera_connection)
 {
-    reset_environment(1);
+    reset_environment();
+    add_camera("Port 0", "Test");
 
     auto cameras = get_camera_connection();
 
@@ -54,11 +58,14 @@ TEST(get_camera_connection, only_camera_connection)
     ASSERT_NE(nullptr, conn);
 
     EXPECT_EQ("Port 0", conn->get_port());
+    EXPECT_EQ("Test", conn->get_desc());
 }
 
 TEST(get_camera_connection, second_camera_connection)
 {
-    reset_environment(2);
+    reset_environment();
+    add_camera("0", "Test");
+    add_camera("Port 1", "Test Camera 1");
 
     auto cameras = get_camera_connection();
 
@@ -69,11 +76,13 @@ TEST(get_camera_connection, second_camera_connection)
     ASSERT_NE(nullptr, conn);
 
     EXPECT_EQ("Port 1", conn->get_port());
+    EXPECT_EQ("Test Camera 1", conn->get_desc());
 }
 
 TEST(get_camera_connection, only_camera_info)
 {
-    reset_environment(1);
+    reset_environment();
+    add_camera("0", "Test");
 
     auto cameras = get_camera_connection();
 
@@ -88,7 +97,9 @@ TEST(get_camera_connection, only_camera_info)
 
 TEST(get_camera_connection, second_then_first_camera_connection)
 {
-    reset_environment(2);
+    reset_environment();
+    add_camera("Port 0", "Test");
+    add_camera("Port 1", "Test Camera 1");
 
     auto cameras = get_camera_connection();
 
@@ -99,12 +110,14 @@ TEST(get_camera_connection, second_then_first_camera_connection)
     ASSERT_NE(nullptr, conn);
 
     EXPECT_EQ("Port 1", conn->get_port());
+    EXPECT_EQ("Test Camera 1", conn->get_desc());
+
     cameras->deselect_camera(camera);
-    
 
     camera = cameras->select_camera(0);
     conn = camera->get_connection_info();
     ASSERT_NE(nullptr, conn);
 
     EXPECT_EQ("Port 0", conn->get_port());
+    EXPECT_EQ("Test", conn->get_desc());
 }

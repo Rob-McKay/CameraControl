@@ -217,11 +217,13 @@ class EdsCameraList : public __EdsObject
     std::vector<EdsCamera> cameras;
 
 public:
-    EdsCameraList(int num_cameras)
+    EdsCameraList() { }
+
+    void add_camera(std::string port, std::string name) // TODO: Add other camera settings
     {
-        for (int c = 0; c < num_cameras; c++)
-            cameras.emplace_back("Port " + std::to_string(c), "Test Camera " + std::to_string(c));
+        cameras.emplace_back(port, name);
     }
+
     int size()
     {
         EXPECT_GE(count, 1);
@@ -261,13 +263,19 @@ int initialised_count = 0;
 int finalised_count = 0;
 int max_num_cameras = 1;
 
-void reset_environment(int max_cameras)
+void reset_environment()
 {
     current_camera = nullptr;
     camera_list = nullptr;
-    max_num_cameras = max_cameras;
     initialised_count = 0;
     finalised_count = 0;
+}
+
+void add_camera(std::string port, std::string camera_name)
+{
+    if (!camera_list)
+        camera_list = std::make_shared<EdsCameraList>();
+    camera_list->add_camera(port, camera_name);
 }
 
 #pragma clang diagnostic ignored "-Wunused-parameter"
@@ -343,7 +351,7 @@ EdsError EDSAPI EdsGetPropertyDesc(
 EdsError EDSAPI EdsGetCameraList(EdsCameraListRef* outCameraListRef)
 {
     if (!camera_list)
-        camera_list = std::make_shared<EdsCameraList>(max_num_cameras);
+        camera_list = std::make_shared<EdsCameraList>();
 
     camera_list->retain();
     *outCameraListRef = camera_list.get();
